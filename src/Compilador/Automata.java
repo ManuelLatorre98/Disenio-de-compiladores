@@ -11,21 +11,22 @@ public class Automata {
         this.programa = programa;
     }
     //"begin 2+2 a<5 end"
-    public ArrayList<Token> getTokens() {
+    public void getTokens() {
         boolean error = false;
         while(!error && cabeza<programa.length()) {
+            System.out.println("ttt");
             leer_blancos();
-            if(!get_operador_relacional()) continue;
-            if(!get_operador_aritmetico()) continue;
-            if(!get_asignacion()) continue;
-            if(!get_punto_coma()) continue;
-            if(!get_coma()) continue;
-            if(!get_identificador()) continue;
-            if(!comentario()) continue;
+            if(get_operador_relacional()) continue;
+            if(get_operador_aritmetico()) continue;
+            if(get_asignacion()) continue;
+            if(get_punto_coma()) continue;
+            if(get_coma()) continue;
+            if(get_identificador()) continue;
+            if(comentario()) continue;
             
             error = true;//no fue reconocido
         }
-        return tokenList;
+        //return tokenList;
     }
     private boolean get_operador_relacional(){
         boolean exito = false;
@@ -244,11 +245,15 @@ public class Automata {
         Token token = new Token("identificador"); // new Token("");
         while(!exito && not_stop && cabeza<programa.length()) {
             c = programa.charAt(cabeza);
-            lexema+=c;
             switch (state) {
                 case 0:
-                    if(c == ' ' || c == ';') state = 1;//leo hasta encontrar un espacio
-                case 1:
+                    if(!Character.toString(c).matches("^[a-zA-Z0-9_]+$")) state = 1;//leo hasta encontrar un espacio
+                    else{
+                        lexema+=c;
+                        cabeza++;
+                    }  
+                    break;
+                    case 1:
                     if(lexema.matches("^[a-zA-Z0-9_]+$")){//cualquier letra digito o guionbajo
                         exito = true;
                         tokenList.add(token);
@@ -257,7 +262,7 @@ public class Automata {
                     break;
                 default: not_stop = false;
             }
-            if(!exito) cabeza++; //la cabeza deber quedarse a la derecha del ultimo caracter del lexema 
+            //if(!exito && c != ' ' && c != ';') cabeza++; //la cabeza deber quedarse a la derecha del ultimo caracter del lexema 
         }//end_while
         if(!exito) cabeza = inicio_cabeza;
         return exito;
@@ -293,8 +298,11 @@ public class Automata {
     } 
 
     public void leer_blancos(){
-        char c = programa.charAt(cabeza);
-        while(c == ' ') cabeza++;
+        char c = programa.charAt(cabeza);//horrible FIXEAR
+        while(c == ' '){
+            c = programa.charAt(cabeza);
+            cabeza++;
+        };
     }
 
     public void print_lexema_token(String lexema, String token){
