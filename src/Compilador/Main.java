@@ -8,21 +8,16 @@ public class Main {
         //String programa = "begin a<5; end. ";
         //String programa = "begin <= +- ; , {}=:=";
         //String programa = ">";
-        String ruta;
         String programa;
-        if(args.length > 0) ruta = args[0];
-        //D:\Escritorio\Intellij\DisenioDeCompiladores\src\Compilador\archivodeprueba.txt
-        URL url = Main.class.getResource("archivodeprueba.txt");
-        //System.out.println(url);
-        //ruta ="D:\\Escritorio\\Intellij\\DisenioDeCompiladores\\src\\Compilador\\archivodeprueba.txt";
-
-        //ruta =url.toString();
-        LeerArchivo archivo = new LeerArchivo(url.getPath());
-        programa = archivo.getPrograma();
-        Automata automata = new Automata(programa);
-        automata.getTokens();
-
+        URL url = null;
+        try{
+            url = Main.class.getResource(args[0]);
+            LeerArchivo archivo = new LeerArchivo(url.getPath());
+            programa = archivo.getPrograma();
+            Automata automata = new Automata(programa);
+            automata.getTokens();
+        }catch(Exception e){
+            System.err.println("DEBE INGRESAR POR PARAMETRO LA RUTA DEL ARCHIVO DE TEXTO");
+        }
     }
-
-
 }

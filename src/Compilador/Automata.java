@@ -27,7 +27,7 @@ public class Automata {
             error = true;//no fue reconocido
         }
         if(error){
-            System.out.println("ERROR DE SINTAXIS");
+            System.out.println("ERROR LEXICO");
         }
         //return tokenList;
     }
