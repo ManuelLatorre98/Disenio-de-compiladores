@@ -1,5 +1,6 @@
 package Compilador;
 
+import java.rmi.server.RemoteStub;
 import java.util.ArrayList;
 
 public class Automata {
@@ -8,13 +9,13 @@ public class Automata {
     private String programa;
 
     public Automata(String programa) {
-        this.programa = programa;
+        this.programa = programa+" ";
     }
     //"begin 2+2 a<5 end"
     public void getTokens() {
         boolean error = false;
         while(!error && cabeza<programa.length()) {
-            leer_blancos();
+            if(!leer_blancos()) break;
             if(get_operador_relacional()) continue;
             if(get_operador_aritmetico()) continue;
             if(get_asignacion()) continue;
@@ -22,7 +23,7 @@ public class Automata {
             if(get_coma()) continue;
             if(get_identificador()) continue;
             if(comentario()) continue;
-            if(get_punto()) continue;
+            if(get_punto()) break;
             error = true;//no fue reconocido
         }
         if(error){
@@ -257,10 +258,11 @@ public class Automata {
                     break;
                 default: not_stop = false;
             }
-            if(!exito && cabeza != (programa.length()-1)) cabeza++; //la cabeza deber quedarse a la derecha del ultimo caracter del lexema 
+            if(!exito) cabeza++; //la cabeza deber quedarse a la derecha del ultimo caracter del lexema 
         }//end_while
         if(!exito) cabeza = inicio_cabeza;
-        else cabeza++;
+        else if(cabeza < programa.length()-1)System.out.println("WARNING: Caracteres ignorados despues del punto.");
+
         return exito;
     }   
     
@@ -312,11 +314,12 @@ public class Automata {
                     else not_stop = false;
                     break;
                 case 1:
-                    if(c == '}'){
-                        exito = true;
-                        print_lexema_token(lexema, "COMENTARIO-NO HAY TOKEN");
-                    }
-                    break;
+                    if(c == '}') state = 2;
+                break;    
+                case 2:       
+                    exito = true;
+                    print_lexema_token(lexema, "COMENTARIO-NO HAY TOKEN");
+                break;
                 default: not_stop = false;
             }
             if(!exito) {cabeza++;lexema+=c;} //la cabeza deber quedarse a la derecha del ultimo caracter del lexema 
@@ -325,12 +328,15 @@ public class Automata {
         return exito;
     } 
 
-    public void leer_blancos(){
-        char c = programa.charAt(cabeza);//horrible FIXEAR
-        while(c == ' '){
+    public boolean leer_blancos(){
+        boolean flag = cabeza+1 < programa.length();
+        char c = programa.charAt(cabeza);
+        while(c == ' ' && flag){
             cabeza++;
             c = programa.charAt(cabeza);
+            flag = cabeza+1 < programa.length();
         };
+        return flag;
     }
 
     public void print_lexema_token(String lexema, String token){
