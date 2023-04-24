@@ -1,5 +1,6 @@
 package Compilador;
 
+import java.net.URL;
 import java.util.ArrayList;
 
 public class Main {
@@ -10,9 +11,13 @@ public class Main {
         String ruta;
         String programa;
         if(args.length > 0) ruta = args[0];
-        else ruta = "Analizador_Lexico\\disenio-de-compiladores\\src\\Compilador\\archivodeprueba.txt";
- 
-        LeerArchivo archivo = new LeerArchivo(ruta);
+        //D:\Escritorio\Intellij\DisenioDeCompiladores\src\Compilador\archivodeprueba.txt
+        URL url = Main.class.getResource("archivodeprueba.txt");
+        //System.out.println(url);
+        //ruta ="D:\\Escritorio\\Intellij\\DisenioDeCompiladores\\src\\Compilador\\archivodeprueba.txt";
+
+        //ruta =url.toString();
+        LeerArchivo archivo = new LeerArchivo(url.getPath());
         programa = archivo.getPrograma();
         Automata automata = new Automata(programa);
         automata.getTokens();
