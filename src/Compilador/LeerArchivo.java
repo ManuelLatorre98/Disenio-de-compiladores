@@ -1,38 +1,25 @@
 package Compilador;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.Scanner;
 
 public class LeerArchivo {
     
-    private String ruta;
-    private File archivo;
+    private InputStreamReader input;
     private Scanner sc;
     
-    public LeerArchivo(String ruta){
-        this.ruta = ruta;
-        this.archivo = new File(this.ruta);
-        
+    public LeerArchivo(InputStreamReader input){
+        this.input = input;
     } 
 
-    public String getPrograma(){
-        String programa = "";
-        
-        try {
-            sc = new Scanner(archivo);
-            while (sc.hasNextLine()) {
-                String linea = sc.nextLine();
-                System.out.println(linea);
-                programa += linea;
-            }
-            sc.close();
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            System.out.println("ERROR");
-            e.printStackTrace();
+    public String getPrograma() throws IOException {
+        BufferedReader buffer = new BufferedReader(input);
+        String line;
+        StringBuilder resultStringBuilder = new StringBuilder();
+        while((line = buffer.readLine())!=null) {
+            resultStringBuilder.append(line);
         }
-        return programa;
+        return resultStringBuilder.toString();
     }
 
 }

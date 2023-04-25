@@ -1,7 +1,11 @@
 package Compilador;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
@@ -9,10 +13,9 @@ public class Main {
         //String programa = "begin <= +- ; , {}=:=";
         //String programa = ">";
         String programa;
-        URL url = null;
         try{
-            url = Main.class.getResource(args[0]);
-            LeerArchivo archivo = new LeerArchivo(url.getPath());
+            InputStreamReader input = new InputStreamReader(Main.class.getResourceAsStream(args[0]));
+            LeerArchivo archivo = new LeerArchivo(input);
             programa = archivo.getPrograma();
             Automata automata = new Automata(programa);
             automata.getTokens();
