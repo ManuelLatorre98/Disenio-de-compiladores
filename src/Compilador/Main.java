@@ -12,9 +12,10 @@ public class Main {
         //String programa = "begin a<5; end. ";
         //String programa = "begin <= +- ; , {}=:=";
         //String programa = ">";
+        //args[0]
         String programa;
         try{
-            InputStreamReader input = new InputStreamReader(Main.class.getResourceAsStream(args[0]));
+            InputStreamReader input = new InputStreamReader(Main.class.getResourceAsStream("archivodeprueba.txt"));
             LeerArchivo archivo = new LeerArchivo(input);
             programa = archivo.getPrograma();
             Automata automata = new Automata(programa);
