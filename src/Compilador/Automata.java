@@ -27,7 +27,7 @@ public class Automata {
             error = true;//no fue reconocido
         }
         if(error){
-            System.out.println("ERROR LEXICO");
+            System.out.println("ERROR LEXICO: Caracter no perteneciente al alfabeto del lenguaje");
         }
         //return tokenList;
     }
