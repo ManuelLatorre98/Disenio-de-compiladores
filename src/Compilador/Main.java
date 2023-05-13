@@ -14,14 +14,16 @@ public class Main {
         //String programa = ">";
         //args[0]
         String programa;
-        try{
-            InputStreamReader input = new InputStreamReader(Main.class.getResourceAsStream("archivodeprueba.txt"));
+        Automata automata = new Automata("begin <= +- ;@ , =:=");//BORRAR ESTAS Y DESCOMENTAR
+        automata.getTokens();
+       /* try{
+            InputStreamReader input = new InputStreamReader(Main.class.getResourceAsStream(args[0]));
             LeerArchivo archivo = new LeerArchivo(input);
             programa = archivo.getPrograma();
             Automata automata = new Automata(programa);
             automata.getTokens();
         }catch(Exception e){
             System.err.println("DEBE INGRESAR POR PARAMETRO LA RUTA DEL ARCHIVO DE TEXTO");
-        }
+        }*/
     }
 }

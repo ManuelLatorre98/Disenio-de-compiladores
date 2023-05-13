@@ -2,19 +2,47 @@ package Compilador;
 
 import java.rmi.server.RemoteStub;
 import java.util.ArrayList;
-
+import java.util.HashMap;
 public class Automata {
-    private int cabeza=0;
+    //private int cabeza=0;
+    private Cabeza cabeza;
     private ArrayList<Token> tokenList= new ArrayList<Token>();
+    private Token returnToken;
     private String programa;
+    private boolean tokenEncontrado=false;
 
-    public Automata(String programa) {
+    private HashMap<String, String> palabrasReservadas = new HashMap<>();
+    private String[] palabras= {
+            "program",
+            "var",
+            "procedure",
+            "function",
+            "integer",
+            "boolean",
+            "begin",
+            "end",
+            "if",
+            "then",
+            "else",
+            "while",
+            "do",
+            "or",
+            "and",
+            "not"
+            };
+
+    public Automata(String programa, Cabeza cab) {
         this.programa = programa+" ";
+        this.cabeza = cab;
+        for(String palabra: palabras){ //Carga lista de palabras reservadas
+            palabrasReservadas.put(palabra,palabra);
+        }
     }
+
     //"begin 2+2 a<5 end"
     public void getTokens() {
         boolean error = false;
-        while(!error && cabeza<programa.length()) {
+        while(!error && cabeza.getCabeza()<programa.length()) {
             if(!leer_blancos()) break;
             if(get_operador_relacional()) continue;
             if(get_operador_aritmetico()) continue;
@@ -31,16 +59,37 @@ public class Automata {
         }
         //return tokenList;
     }
+
+    public Token pedirSiguienteToken(){
+        boolean error = false;
+        tokenEncontrado=false;
+        while(!error && !tokenEncontrado && cabeza.getCabeza()<programa.length()) {
+            if(!leer_blancos()) break;
+            if(get_operador_relacional()){tokenEncontrado=true; continue;}
+            if(get_operador_aritmetico()){ tokenEncontrado=true; continue;}
+            if(get_asignacion()) {tokenEncontrado=true; continue;}
+            if(get_punto_coma()) {tokenEncontrado=true; continue;}
+            if(get_coma()) {tokenEncontrado=true;  continue;}
+            if(get_identificador()) {tokenEncontrado=true; continue;}
+            if(comentario()) {tokenEncontrado=true; continue;}
+            if(get_punto()) break;
+            error = true;//no fue reconocido
+        }
+        if(error){
+            System.out.println("ERROR LEXICO: Caracter no perteneciente al alfabeto del lenguaje");
+        }
+        return returnToken;
+    }
     private boolean get_operador_relacional(){
         boolean exito = false;
         boolean not_stop = true;
-        int inicio_cabeza = cabeza; //en caso de fallo cabeza debe retroceder a inicio
+        int inicio_cabeza = cabeza.getCabeza(); //en caso de fallo cabeza debe retroceder a inicio
         String lexema = "";
         int state = 0;
         char c;
         Token op_relacional_token = new Token("op_relacional");
-        while(!exito && not_stop && cabeza<programa.length()) {
-            c = programa.charAt(cabeza);
+        while(!exito && not_stop && cabeza.getCabeza()<programa.length()) {
+            c = programa.charAt(cabeza.getCabeza());
             switch (state) {
                 case 0:
                     if (c == '=') state = 1;
@@ -81,16 +130,17 @@ public class Automata {
                     break;
                 default: not_stop = false;
             }
-            cabeza++;
+            cabeza.moverCabezaDer();
             lexema+=c;
-            if(exito) {cabeza--; lexema=lexema.substring(0, lexema.length()-1);}
+            if(exito) {cabeza.moverCabezaIzq(); lexema=lexema.substring(0, lexema.length()-1);}
             //if(!exito) {cabeza++;lexema+=c;} //la cabeza deber quedarse a la derecha del ultimo caracter del lexema 
         }//end_while
         if(exito){
-            tokenList.add(op_relacional_token);
+            //tokenList.add(op_relacional_token);
+            returnToken = op_relacional_token;
             print_lexema_token(lexema, op_relacional_token.getNombre());
         }else{
-            cabeza = inicio_cabeza;
+            cabeza.setCabeza(inicio_cabeza);
         } 
         return exito;
     }
@@ -98,13 +148,13 @@ public class Automata {
     private boolean get_operador_aritmetico(){
         boolean exito = false;
         boolean not_stop = true;
-        int inicio_cabeza = cabeza; //en caso de fallo cabeza debe retroceder a inicio
+        int inicio_cabeza = cabeza.getCabeza(); //en caso de fallo cabeza debe retroceder a inicio
         String lexema = "";
         int state = 0;
         char c;
         Token op_artimetico_token = new Token("op_aritmetico");
-        while(!exito && not_stop && cabeza<programa.length()) {
-            c = programa.charAt(cabeza);
+        while(!exito && not_stop && cabeza.getCabeza()<programa.length()) {
+            c = programa.charAt(cabeza.getCabeza());
             switch (state) {
                 case 0:
                     if (c == '+') state = 1;
@@ -131,13 +181,14 @@ public class Automata {
                     break; 
                 default: not_stop = false;
             }
-            if(!exito) {cabeza++;lexema+=c;} //la cabeza deber quedarse a la derecha del ultimo caracter del lexema 
+            if(!exito) {cabeza.moverCabezaDer();lexema+=c;} //la cabeza deber quedarse a la derecha del ultimo caracter del lexema
         }//end_while
         if(exito){
-            tokenList.add(op_artimetico_token);
+            //tokenList.add(op_artimetico_token);
+            returnToken = op_artimetico_token;
             print_lexema_token(lexema, op_artimetico_token.getNombre());
         }else{
-            cabeza = inicio_cabeza;
+            cabeza.setCabeza(inicio_cabeza);
         } 
         return exito;
     }   
@@ -145,13 +196,13 @@ public class Automata {
     private boolean get_asignacion(){
         boolean exito = false;
         boolean not_stop = true;
-        int inicio_cabeza = cabeza; //en caso de fallo cabeza debe retroceder a inicio
+        int inicio_cabeza = cabeza.getCabeza(); //en caso de fallo cabeza debe retroceder a inicio
         String lexema = "";
         int state = 0;
         char c;
         Token token; // new Token("");
-        while(!exito && not_stop && cabeza<programa.length()) {
-            c = programa.charAt(cabeza);
+        while(!exito && not_stop && cabeza.getCabeza()<programa.length()) {
+            c = programa.charAt(cabeza.getCabeza());
             switch (state) {
                 case 0:
                     if (c == ':') state = 1;
@@ -162,34 +213,36 @@ public class Automata {
                     else{
                         exito = true;
                         token = new Token("asignacion_tipo");
-                        tokenList.add(token);
+                        //tokenList.add(token);
+                        returnToken = token;
                         print_lexema_token(lexema, token.getNombre());
                     }
                     break;
                 case 2:
                     exito = true;
                     token = new Token("asignacion");
-                    tokenList.add(token);
+                    //tokenList.add(token);
+                    returnToken = token;
                     print_lexema_token(lexema, token.getNombre());
                     break;
                 default: not_stop = false;
             }
-            if(!exito) {cabeza++;lexema+=c;} //la cabeza deber quedarse a la derecha del ultimo caracter del lexema 
+            if(!exito) {cabeza.moverCabezaDer();lexema+=c;} //la cabeza deber quedarse a la derecha del ultimo caracter del lexema
         }//end_while
-        if(!exito) cabeza = inicio_cabeza;
+        if(!exito) cabeza.setCabeza(inicio_cabeza);
         return exito;
     }   
 
     private boolean get_punto_coma(){
         boolean exito = false;
         boolean not_stop = true;
-        int inicio_cabeza = cabeza; //en caso de fallo cabeza debe retroceder a inicio
+        int inicio_cabeza = cabeza.getCabeza(); //en caso de fallo cabeza debe retroceder a inicio
         String lexema = "";
         int state = 0;
         char c;
         Token token = new Token("punto_coma"); // new Token("");
-        while(!exito && not_stop && cabeza<programa.length()) {
-            c = programa.charAt(cabeza);
+        while(!exito && not_stop && cabeza.getCabeza()<programa.length()) {
+            c = programa.charAt(cabeza.getCabeza());
             switch (state) {
                 case 0:
                     if (c == ';') state = 1;
@@ -197,27 +250,28 @@ public class Automata {
                     break;
                 case 1:
                     exito = true;
-                    tokenList.add(token);
+                    //tokenList.add(token);
+                    returnToken=token;
                     print_lexema_token(lexema, token.getNombre());
                     break;
                 default: not_stop = false;
             }
-            if(!exito) {cabeza++;lexema+=c;} //la cabeza deber quedarse a la derecha del ultimo caracter del lexema 
+            if(!exito) {cabeza.moverCabezaDer();lexema+=c;} //la cabeza deber quedarse a la derecha del ultimo caracter del lexema
         }//end_while
-        if(!exito) cabeza = inicio_cabeza;
+        if(!exito) cabeza.setCabeza(inicio_cabeza);
         return exito;
     }   
 
     private boolean get_coma(){
         boolean exito = false;
         boolean not_stop = true;
-        int inicio_cabeza = cabeza; //en caso de fallo cabeza debe retroceder a inicio
+        int inicio_cabeza = cabeza.getCabeza(); //en caso de fallo cabeza debe retroceder a inicio
         String lexema = "";
         int state = 0;
         char c;
         Token token = new Token("coma"); // new Token("");
-        while(!exito && not_stop && cabeza<programa.length()) {
-            c = programa.charAt(cabeza);
+        while(!exito && not_stop && cabeza.getCabeza()<programa.length()) {
+            c = programa.charAt(cabeza.getCabeza());
             switch (state) {
                 case 0:
                     if (c == ',') state = 1;
@@ -225,27 +279,28 @@ public class Automata {
                     break;
                 case 1:
                     exito = true;
-                    tokenList.add(token);
+                    //tokenList.add(token);
+                    returnToken=token;
                     print_lexema_token(lexema, token.getNombre());
                     break;
                 default: not_stop = false;
             }
-            if(!exito) {cabeza++;lexema+=c;} //la cabeza deber quedarse a la derecha del ultimo caracter del lexema 
+            if(!exito) {cabeza.moverCabezaDer(); lexema+=c;} //la cabeza deber quedarse a la derecha del ultimo caracter del lexema
         }//end_while
-        if(!exito) cabeza = inicio_cabeza;
+        if(!exito) cabeza.setCabeza(inicio_cabeza);
         return exito;
     }   
 
     private boolean get_punto(){
         boolean exito = false;
         boolean not_stop = true;
-        int inicio_cabeza = cabeza; //en caso de fallo cabeza debe retroceder a inicio
+        int inicio_cabeza = cabeza.getCabeza(); //en caso de fallo cabeza debe retroceder a inicio
         String lexema = "";
         int state = 0;
         char c;
         Token token = new Token("punto"); // new Token("");
-        while(!exito && not_stop && cabeza<programa.length()) {
-            c = programa.charAt(cabeza);
+        while(!exito && not_stop && cabeza.getCabeza()<programa.length()) {
+            c = programa.charAt(cabeza.getCabeza());
             switch (state) {
                 case 0:
                     if (c == '.') {state = 1;lexema+=c;}
@@ -253,41 +308,48 @@ public class Automata {
                     break;
                 case 1:
                     exito = true;
-                    tokenList.add(token);
+                    //tokenList.add(token);
+                    returnToken=token;
                     print_lexema_token(lexema, token.getNombre());
                     break;
                 default: not_stop = false;
             }
-            if(!exito) cabeza++; //la cabeza deber quedarse a la derecha del ultimo caracter del lexema 
+            if(!exito)cabeza.moverCabezaDer(); //la cabeza deber quedarse a la derecha del ultimo caracter del lexema
         }//end_while
-        if(!exito) cabeza = inicio_cabeza;
-        else if(cabeza < programa.length()-1)System.out.println("WARNING: Caracteres ignorados despues del punto.");
+        if(!exito) cabeza.setCabeza(inicio_cabeza);
+        else if(cabeza.getCabeza() < programa.length()-1)System.out.println("WARNING: Caracteres ignorados despues del punto.");
 
         return exito;
-    }   
+    }
     
     private boolean get_identificador(){
         boolean exito = false;
         boolean not_stop = true;
-        int inicio_cabeza = cabeza; //en caso de fallo cabeza debe retroceder a inicio
+        int inicio_cabeza = cabeza.getCabeza(); //en caso de fallo cabeza debe retroceder a inicio
         String lexema = "";
         int state = 0;
         char c;
         Token token = new Token("identificador"); // new Token("");
-        while(!exito && not_stop && cabeza<programa.length()) {
-            c = programa.charAt(cabeza);
+        while(!exito && not_stop && cabeza.getCabeza()<programa.length()) {
+            c = programa.charAt(cabeza.getCabeza());
             switch (state) {
                 case 0:
-                    if(!Character.toString(c).matches("^[a-zA-Z0-9_]+$")) state = 1;//leo hasta encontrar un espacio
+                    if(!Character.toString(c).matches("^[a-zA-Z_]+$")) state = 1;//leo hasta encontrar un espacio
                     else{
                         lexema+=c;
-                        cabeza++;
+                        cabeza.moverCabezaDer();
                     }  
                     break;
                     case 1:
-                    if(lexema.matches("^[a-zA-Z0-9_]+$")){//cualquier letra digito o guionbajo
+                    if(lexema.matches("^[a-zA-Z_]+$")){//cualquier letra digito o guionbajo
                         exito = true;
-                        tokenList.add(token);
+                        if(palabrasReservadas.containsKey(lexema)){
+                            token.setValor(lexema);
+                        }else{
+                            token.setValor("identificador");
+                        }
+                        //tokenList.add(token);
+                        returnToken=token;
                         print_lexema_token(lexema, token.getNombre());
                     }else not_stop = false;
                     break;
@@ -295,19 +357,19 @@ public class Automata {
             }
             //if(!exito && c != ' ' && c != ';') cabeza++; //la cabeza deber quedarse a la derecha del ultimo caracter del lexema 
         }//end_while
-        if(!exito) cabeza = inicio_cabeza;
+        if(!exito) cabeza.setCabeza(inicio_cabeza);
         return exito;
     }  
 
     private boolean comentario(){
         boolean exito = false;
         boolean not_stop = true;
-        int inicio_cabeza = cabeza; //en caso de fallo cabeza debe retroceder a inicio
+        int inicio_cabeza = cabeza.getCabeza(); //en caso de fallo cabeza debe retroceder a inicio
         String lexema = "";
         int state = 0;
         char c;
-        while(!exito && not_stop && cabeza<programa.length()) {
-            c = programa.charAt(cabeza);
+        while(!exito && not_stop && cabeza.getCabeza()<programa.length()) {
+            c = programa.charAt(cabeza.getCabeza());
             switch (state) {
                 case 0:
                     if(c == '{') state = 1;
@@ -322,19 +384,19 @@ public class Automata {
                 break;
                 default: not_stop = false;
             }
-            if(!exito) {cabeza++;lexema+=c;} //la cabeza deber quedarse a la derecha del ultimo caracter del lexema 
+            if(!exito) {cabeza.moverCabezaDer(); lexema+=c;} //la cabeza deber quedarse a la derecha del ultimo caracter del lexema
         }//end_while
-        if(!exito) cabeza = inicio_cabeza; 
+        if(!exito) cabeza.setCabeza(inicio_cabeza);
         return exito;
     } 
 
     public boolean leer_blancos(){
-        boolean flag = cabeza+1 < programa.length();
-        char c = programa.charAt(cabeza);
+        boolean flag = cabeza.getCabeza()+1 < programa.length();
+        char c = programa.charAt(cabeza.getCabeza());
         while(c == ' ' && flag){
-            cabeza++;
-            c = programa.charAt(cabeza);
-            flag = cabeza+1 < programa.length();
+            cabeza.moverCabezaDer();
+            c = programa.charAt(cabeza.getCabeza());
+            flag = cabeza.getCabeza()+1 < programa.length();
         };
         return flag;
     }
@@ -343,5 +405,40 @@ public class Automata {
         System.out.println("Lexema: "+lexema+" Token: "+token);
     }
 
+
+    private boolean get_numero(){
+        boolean exito = false;
+        boolean not_stop = true;
+        int inicio_cabeza = cabeza.getCabeza(); //en caso de fallo cabeza debe retroceder a inicio
+        String lexema = "";
+        int state = 0;
+        char c;
+        Token token = new Token("numero"); // new Token("");
+        while(!exito && not_stop && cabeza.getCabeza()<programa.length()) {
+            c = programa.charAt(cabeza.getCabeza());
+            switch (state) {
+                case 0:
+                    if(!Character.toString(c).matches("^[0-9]+$")) state = 1;//leo hasta encontrar un espacio
+                    else{
+                        lexema+=c;
+                        cabeza.moverCabezaDer();
+                    }
+                    break;
+                case 1:
+                    if(lexema.matches("^[0-9]+$")){//cualquier digito
+                        exito = true;
+                        token.setValor(lexema);
+                        //tokenList.add(token);
+                        returnToken=token;
+                        print_lexema_token(lexema, token.getNombre());
+                    }else not_stop = false;
+                    break;
+                default: not_stop = false;
+            }
+            //if(!exito && c != ' ' && c != ';') cabeza++; //la cabeza deber quedarse a la derecha del ultimo caracter del lexema
+        }//end_while
+        if(!exito) cabeza.setCabeza(inicio_cabeza);
+        return exito;
+    }
 }
 
