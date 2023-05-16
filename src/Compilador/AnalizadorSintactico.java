@@ -1,35 +1,52 @@
 package Compilador;
 
+import java.io.InputStreamReader;
+
 public class AnalizadorSintactico {
     private Cabeza cabeza;
     private Automata automata;
     Token lookahead;
     private String syntaxErrMsg = "Syntax error";
-    public AnalizadorSintactico(){
+    public AnalizadorSintactico(String path){
         cabeza= new Cabeza();
         //todo manejar lo de obtener programa desde aca
-        automata= new Automata("begin <= +- ;@ , =:=",cabeza);
+        try{
+            InputStreamReader input = new InputStreamReader(Main.class.getResourceAsStream(path));
+            LeerArchivo archivo = new LeerArchivo(input);
+            String prog = archivo.getPrograma();
+            System.out.println(prog);
+            automata= new Automata(prog,cabeza);
+        }catch(Exception e){
+            System.err.println("DEBE INGRESAR POR PARAMETRO LA RUTA DEL ARCHIVO DE TEXTO");
+        }
+
     }
-    private void analizar(){
+    public void analizar(){
         lookahead = automata.pedirSiguienteToken();
+        if(lookahead==null){
+            throw new SyntaxException("Programa vacio");
+        }
         programa();
     }
 
-    private void obtenerToken(){
+    private void match(String string){
+        if(lookahead==null){
+            throw new SyntaxException("Syntax Exception: null");
+        }
+        if(!lookahead.getValor().equals(string)){
+            throw new SyntaxException("Syntax Exception: '"+string+"' expected. Received '"+lookahead.getValor()+"'");
+        }
         lookahead = automata.pedirSiguienteToken();
-    }
-    private void match(){
-        //COMPARA STRING CON LOOKAHEAD ACTUAL SI COINCIDE BUSCA OTRO TOKEN
-        //SI FALLA TIRA EXCEPTION
     }
 
     void programa(){
-        if(lookahead == "program"){
+        if(lookahead.getValor().equals("program")){
             match("program");
             match("identificador");
+            match(";");
             bloque();
         }else{
-            System.out.println(syntaxErrMsg);
+            throw new SyntaxException("Syntax Exception: 'program' expected");
         }
     }
 
@@ -41,80 +58,84 @@ public class AnalizadorSintactico {
 
     //DECLARACIONES
     void seccion_declaracion_variables(){
-        if(lookahead == "var"){
+        if(lookahead.getValor().equals("var")){
             match("var");
-            seccion_declaracion_variables();
-            while(true){
-                if(lookahead == ";"){
+            declaracion_variables();
+            match(";");
+            while(true){//todo ; declaracion_variables esta de mas
+                if(lookahead.getValor().equals("identificador")){
+                    declaracion_variables();
                     match(";");
-                    declaracion_varaibles();
-                    continue; //todo continue
+                    continue;
                 }
-                break; //todo break
+                break;
             }
         }else{
-            System.out.println(syntaxErrMsg);
+            //todo ACA
+            //throw new SyntaxException("Syntax Exception");
+            //lookahead = automata.pedirSiguienteToken();
         }
     }
 
-    void declaracion_varaibles(){
+    void declaracion_variables(){
         lista_identificadores();
-        if(lookahead == ":"){
+        if(lookahead.getValor().equals(":")){
             match(":");
             tipo();
         }else{
-            System.out.println(syntaxErrMsg);
+            throw new SyntaxException("Syntax Exception: ':' expected");
         }
     }
 
     void lista_identificadores(){
-        if(lookahead == "identifcador"){
+        if(lookahead.getValor().equals("identificador")){
             match("identificador");
             while(true){
-                if(lookahead == ','){
-                    match(',');
+                if(lookahead.getValor().equals(",")){
+                    match(",");
                     match("identificador");
-                    continue //todo para que continue while entiendo ???
+                    continue;
                 }
-                break; //todo nos mata si dejamos esto
+                break;
             }
         }else {
-            System.out.println(syntaxErrMsg);
+            throw new SyntaxException("Syntax Exception: 'identificador' expected");
         }
     }
 
     void tipo(){
-        switch(lookahead){
-            case "integer" : match("integer"); match(";"); break;
-            case "boolean" : match("boolean"); match(";"); break;
-            default: System.out.println(syntaxErrMsg);
+        switch(lookahead.getValor()){//todo borramos match(";")
+            case "integer" : match("integer"); break;
+            case "boolean" : match("boolean"); break;
+            default: throw new SyntaxException("Syntax Exception: 'integer/boolean' expected");
         }
     }
 
     void seccion_declaracion_subrutinas(){
         while(true){
-            switch(lookahead){
-                case "procedure" : declaracion_procedimiento(); match; continue; //todo otra vez continue
-                case "function" : declaracion_funcion(); match(";"); continue; //todo continue
+            switch(lookahead.getValor()){
+                case "procedure" : declaracion_procedimiento(); match(";"); continue;
+                case "function" : declaracion_funcion(); match(";"); continue;
+                //default: lookahead = automata.pedirSiguienteToken();
             }
-            break; //todo break
+            break;
         }
     }
 
     void declaracion_procedimiento(){
-        if(lookahead == "procedure"){
+        if(lookahead.getValor().equals("procedure")){
             match("procedure");
             match("identificador");
             parametros_formales();
             match(";");
             bloque();
         }else{
-            System.out.println(syntaxErrMsg);
+            throw new SyntaxException("Syntax Exception: 'procedure' expected");
         }
     }
 
     void declaracion_funcion(){
-        if(lookahead == "function"){
+        if(lookahead.getValor().equals("function")){
             match("function");
             match("identificador");
             parametros_formales();
@@ -123,16 +144,16 @@ public class AnalizadorSintactico {
             match(";");
             bloque();
         }else{
-            System.out.println(syntaxErrMsg);
+            throw new SyntaxException("Syntax Exception: 'function' expected");
         }
     }
 
     void parametros_formales(){
-        if(lookahead == "("){
+        if(lookahead.getValor().equals("(")){
             match("(");
             seccion_parametros_formales();
             while(true){
-                if(lookahead == ";"){
+                if(lookahead.getValor().equals(";")){
                     match(";");
                     seccion_parametros_formales();
                     continue; //todo continue
@@ -141,42 +162,41 @@ public class AnalizadorSintactico {
             }
             match(")");
         }else{
-            System.out.println(syntaxErrMsg);
+            //lookahead = automata.pedirSiguienteToken();
         }
     }
 
     void seccion_parametros_formales(){
         lista_identificadores();
-        if(lookahead == ":"){
+        if(lookahead.getValor().equals(":")){
             match(":");
             tipo();
         }else{
-            System.out.println(syntaxErrMsg);
+            throw new SyntaxException("Syntax Exception: ':' expected");
         }
     }
 
     //SENTENCIAS
-
     void sentencia_compuesta(){
-        if(lookahead == "begin"){
+        if(lookahead.getValor().equals("begin")){
             match("begin");
             sentencia();
             while(true){
-                if(lookahead == ";"){
+                if(lookahead.getValor().equals(";")){
                     match(";");
                     sentencia();
-                    continue; //todo continue
+                    continue;
                 }
-                break; //todo break;
+                break;
             }
             match("end");
         }else{
-            System.out.println(syntaxErrMsg);
+            throw new SyntaxException("Syntax Exception: 'begin' expected");
         }
     }
 
     void sentencia(){
-        switch (lookahead){
+        switch (lookahead.getValor()){
             case "identificador":
                 match("identificador");
                 temp();
@@ -191,12 +211,12 @@ public class AnalizadorSintactico {
                 sentencia_repetitiva();
                 break;
             default:
-                System.out.println(syntaxErrMsg);
+                throw new SyntaxException("Syntax Exception: 'identificador/begin/if/while' expected");
         }
     }
 
     void temp(){
-        if(lookahead == ":") {
+        if(lookahead.getValor().equals(":=")) {
             asignacion();
         }else{
             llamada_procedimiento();
@@ -205,46 +225,50 @@ public class AnalizadorSintactico {
     }
 
     void asignacion(){
-        if(lookahead == ":"){
-            match(":");
-            match"=";
+        if(lookahead.getValor().equals(":=")){
+            match(":=");
+            //match("="); //todo ACA
             expresion();
         }else{
-            System.out.println(syntaxErrMsg);
+            throw new SyntaxException("Syntax Exception: ':=' expected");
         }
     }
 
     void llamada_procedimiento(){
-        if(lookahead == "("){
+        if(lookahead.getValor().equals("(")){
             match("(");
             lista_expresiones();
             match(")");
+        }else{
+            //lookahead = automata.pedirSiguienteToken();
         }
     }
 
     void sentencia_condicional(){
-        if(lookahead == "if"){
+        if(lookahead.getValor().equals("if")){
             match("if");
             expresion();
             match("then");
             sentencia();
-            if(lookahead == "else"){
+            if(lookahead.getValor().equals("else")){
                 match("else");
                 sentencia();
+            }else{
+               // lookahead = automata.pedirSiguienteToken();
             }
         }else{
-            System.out.println(syntaxErrMsg);
+            throw new SyntaxException("Syntax Exception: 'if' expected");
         }
     }
 
     void sentencia_repetitiva(){
-        if(lookahead == "while"){
+        if(lookahead.getValor().equals("while")){
             match("while");
             expresion();
             match("do");
             sentencia();
         }else{
-            System.out.println(syntaxErrMsg);
+            throw new SyntaxException("Syntax Exception: 'while' expected");
         }
     }
 
@@ -252,7 +276,7 @@ public class AnalizadorSintactico {
     void lista_expresiones(){
         expresion();
         while(true){
-            if(lookahead == ","){
+            if(lookahead.getValor().equals(",")){
                 match(",");
                 expresion();
                 continue; //todo continue
@@ -263,58 +287,59 @@ public class AnalizadorSintactico {
 
     void expresion(){
         expresion_simple();
-        if(lookahead == "=" || lookahead == "<" || lookahead == ">"){
+        if(lookahead.getValor().equals("=") || lookahead.getValor().equals("<") || lookahead.getValor().equals(">")){
             relacion();
             expresion_simple();
         }
     }
 
     void expresion_simple(){
-        if(lookahead =="+" || lookahead == "-"){//todo CREO QUE NO VA
-            if(lookahead == "+") match("+");
-            if(lookahead == "-") match("-");
+        if(lookahead.getValor().equals("+") || lookahead.getValor().equals("-")){
+            if(lookahead.getValor().equals("+")) match("+");
+            if(lookahead.getValor().equals("-")) match("-");
         }
         termino();
         while(true){
-            if(lookahead == "+" || lookahead= "-" || lookahead == 'or'){ //todo CREO QUE NO VA
-                switch(lookahead){
+            if(lookahead.getValor().equals("+") || lookahead.equals("-") || lookahead.getValor().equals("or")){
+                switch(lookahead.getValor()){
                     case "+": match("+"); break;
                     case "-": match("-"); break;
                     case "or": match("or");break;
                 }
                 termino();
-                continue; //todo continue
+                continue;
             }
-            break; //todo break
+            break;
         }
     }
 
     void relacion(){
-        switch (lookahead){
+        switch (lookahead.getValor()){
             case "=": match("="); break;
             case "<":
-                match('<');
-                switch(lookahead){
+                match("<");
+                switch(lookahead.getValor()){
                     case ">": match(">"); break;
                     case "=": match("="); break;
                 }
                 break;
             case ">":
                 match(">");
-                if(lookahead == "=") match("=");
+                if(lookahead.getValor().equals("=")) match("=");
                 break;
             default:
-                System.out.println(syntaxErrMsg);
+                throw new SyntaxException("Syntax Exception: '=/</>' expected");
         }
     }
 
     void termino(){
         factor();
         while(true){
-            if(lookahead == "*" || lookahead == "div" || lookahead == "and"){
-                switch (lookahead){
+            if(lookahead.getValor().equals("*") || lookahead.getValor().equals("div") || lookahead.getValor().equals("and")){
+                switch (lookahead.getValor()){
                     case "*": match("*"); break;
                     case "div": match("div"); break;
+                    case "and": match("and"); break;
                 }
                 factor();
                 continue;
@@ -324,7 +349,7 @@ public class AnalizadorSintactico {
     }
 
     void factor(){
-        switch(lookahead){
+        switch(lookahead.getValor()){
             case "identificador":
                 match("identificador");
                 llamada_funcion();
@@ -335,19 +360,19 @@ public class AnalizadorSintactico {
                 expresion();
                 match(")");
                 break;
+            case "not": match("not"); factor(); break;
             case "true": match("true"); break;
             case "false": match("false"); break;
             default:
-                System.out.println(syntaxErrMsg);
+                throw new SyntaxException("Syntax Exception: 'identificador/numero/(/not/true/false' expected");
         }
     }
 
     void llamada_funcion(){
-        if(lookahead == "("){
+        if(lookahead.getValor().equals("(")){
             match("(");
             lista_expresiones();
             match(")");
-
         }
-    }*/
+    }
 }

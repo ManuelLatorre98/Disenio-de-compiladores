@@ -14,8 +14,8 @@ public class Main {
         //String programa = ">";
         //args[0]
         String programa;
-        Automata automata = new Automata("begin <= +- ;@ , =:=");//BORRAR ESTAS Y DESCOMENTAR
-        automata.getTokens();
+        AnalizadorSintactico syntax = new AnalizadorSintactico(args[0]);
+        syntax.analizar();
        /* try{
             InputStreamReader input = new InputStreamReader(Main.class.getResourceAsStream(args[0]));
             LeerArchivo archivo = new LeerArchivo(input);

@@ -39,30 +39,10 @@ public class Automata {
         }
     }
 
-    //"begin 2+2 a<5 end"
-    public void getTokens() {
-        boolean error = false;
-        while(!error && cabeza.getCabeza()<programa.length()) {
-            if(!leer_blancos()) break;
-            if(get_operador_relacional()) continue;
-            if(get_operador_aritmetico()) continue;
-            if(get_asignacion()) continue;
-            if(get_punto_coma()) continue;
-            if(get_coma()) continue;
-            if(get_identificador()) continue;
-            if(comentario()) continue;
-            if(get_punto()) break;
-            error = true;//no fue reconocido
-        }
-        if(error){
-            System.out.println("ERROR LEXICO: Caracter no perteneciente al alfabeto del lenguaje");
-        }
-        //return tokenList;
-    }
-
     public Token pedirSiguienteToken(){
         boolean error = false;
         tokenEncontrado=false;
+        returnToken=null;
         while(!error && !tokenEncontrado && cabeza.getCabeza()<programa.length()) {
             if(!leer_blancos()) break;
             if(get_operador_relacional()){tokenEncontrado=true; continue;}
@@ -71,12 +51,14 @@ public class Automata {
             if(get_punto_coma()) {tokenEncontrado=true; continue;}
             if(get_coma()) {tokenEncontrado=true;  continue;}
             if(get_identificador()) {tokenEncontrado=true; continue;}
-            if(comentario()) {tokenEncontrado=true; continue;}
+            if(get_numero()) {tokenEncontrado=true; continue;}
+            if(comentario()) {continue;}
+            if(get_parentesis()){tokenEncontrado=true; continue;}
             if(get_punto()) break;
             error = true;//no fue reconocido
         }
         if(error){
-            System.out.println("ERROR LEXICO: Caracter no perteneciente al alfabeto del lenguaje");
+            throw new LexicalException("ERROR LEXICO: Caracter no perteneciente al alfabeto del lenguaje");
         }
         return returnToken;
     }
@@ -99,34 +81,34 @@ public class Automata {
                     break;
                 case 1:
                     exito = true;
-                    op_relacional_token.setValor("igual");
+                    op_relacional_token.setValor("=");
                     break;
                 case 2: 
                     if(c == '>') state = 4;
                     else if(c == '=') state = 5;
                     else{//si es cualquier otra cosa q no sea > o =
                         exito = true;
-                        op_relacional_token.setValor("menor");
+                        op_relacional_token.setValor("<");
                     }; 
                     break;
                 case 3://> o >=
                     if(c == '=') state = 6;
                     else{//si es cualquier otra cosa q no sea =
                         exito = true;
-                        op_relacional_token.setValor("mayor");
+                        op_relacional_token.setValor(">");
                     }
                     break;
                 case 4:
                     exito = true;
-                    op_relacional_token.setValor("distinto");
+                    op_relacional_token.setValor("<>");
                     break;
                 case 5:
                     exito = true;
-                    op_relacional_token.setValor("menor_igual");
+                    op_relacional_token.setValor("<=");
                     break;
                 case 6:
                     exito = true;
-                    op_relacional_token.setValor("mayor_igual");
+                    op_relacional_token.setValor(">=");
                     break;
                 default: not_stop = false;
             }
@@ -165,19 +147,19 @@ public class Automata {
                     break;
                 case 1:
                     exito = true;
-                    op_artimetico_token.setValor("suma");
+                    op_artimetico_token.setValor("+");
                     break;
                 case 2:
                     exito = true;
-                    op_artimetico_token.setValor("resta");
+                    op_artimetico_token.setValor("-");
                     break;    
                 case 3:
                     exito = true;
-                    op_artimetico_token.setValor("multiplicacion");
+                    op_artimetico_token.setValor("*");
                     break; 
                 case 4:
                     exito = true;
-                    op_artimetico_token.setValor("division");
+                    op_artimetico_token.setValor("/");
                     break; 
                 default: not_stop = false;
             }
@@ -214,6 +196,7 @@ public class Automata {
                         exito = true;
                         token = new Token("asignacion_tipo");
                         //tokenList.add(token);
+                        token.setValor(":");
                         returnToken = token;
                         print_lexema_token(lexema, token.getNombre());
                     }
@@ -222,6 +205,7 @@ public class Automata {
                     exito = true;
                     token = new Token("asignacion");
                     //tokenList.add(token);
+                    token.setValor(":=");
                     returnToken = token;
                     print_lexema_token(lexema, token.getNombre());
                     break;
@@ -251,6 +235,7 @@ public class Automata {
                 case 1:
                     exito = true;
                     //tokenList.add(token);
+                    token.setValor(";");
                     returnToken=token;
                     print_lexema_token(lexema, token.getNombre());
                     break;
@@ -280,6 +265,7 @@ public class Automata {
                 case 1:
                     exito = true;
                     //tokenList.add(token);
+                    token.setValor(",");
                     returnToken=token;
                     print_lexema_token(lexema, token.getNombre());
                     break;
@@ -309,6 +295,7 @@ public class Automata {
                 case 1:
                     exito = true;
                     //tokenList.add(token);
+                    token.setValor(".");
                     returnToken=token;
                     print_lexema_token(lexema, token.getNombre());
                     break;
@@ -344,6 +331,7 @@ public class Automata {
                     if(lexema.matches("^[a-zA-Z_]+$")){//cualquier letra digito o guionbajo
                         exito = true;
                         if(palabrasReservadas.containsKey(lexema)){
+                            token.setNombre(lexema);
                             token.setValor(lexema);
                         }else{
                             token.setValor("identificador");
@@ -427,8 +415,7 @@ public class Automata {
                 case 1:
                     if(lexema.matches("^[0-9]+$")){//cualquier digito
                         exito = true;
-                        token.setValor(lexema);
-                        //tokenList.add(token);
+                        token.setValor("numero");
                         returnToken=token;
                         print_lexema_token(lexema, token.getNombre());
                     }else not_stop = false;
@@ -438,6 +425,38 @@ public class Automata {
             //if(!exito && c != ' ' && c != ';') cabeza++; //la cabeza deber quedarse a la derecha del ultimo caracter del lexema
         }//end_while
         if(!exito) cabeza.setCabeza(inicio_cabeza);
+        return exito;
+    }
+
+    private boolean get_parentesis(){
+        boolean exito = false;
+        boolean not_stop = true;
+        int inicio_cabeza = cabeza.getCabeza(); //en caso de fallo cabeza debe retroceder a inicio
+        String lexema = "";
+        int state = 0;
+        char c;
+        Token token = new Token("parentesis"); // new Token("");
+        while(!exito && not_stop && cabeza.getCabeza()<programa.length()) {
+            c = programa.charAt(cabeza.getCabeza());
+            switch (state) {
+                case 0:
+                    if (c == '(' || c== ')') {state = 1;lexema+=c;}
+                    else not_stop = false;//FALLO
+                    break;
+                case 1:
+                    exito = true;
+                    //tokenList.add(token);
+                    token.setValor(lexema);
+                    returnToken=token;
+                    print_lexema_token(lexema, token.getNombre());
+                    break;
+                default: not_stop = false;
+            }
+            if(!exito)cabeza.moverCabezaDer(); //la cabeza deber quedarse a la derecha del ultimo caracter del lexema
+        }//end_while
+        if(!exito) cabeza.setCabeza(inicio_cabeza);
+        else if(cabeza.getCabeza() < programa.length()-1)System.out.println("WARNING: Caracteres ignorados despues del punto.");
+
         return exito;
     }
 }
