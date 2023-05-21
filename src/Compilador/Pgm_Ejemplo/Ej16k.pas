@@ -6,11 +6,11 @@ function algo(x, y:integer): integer;
     x:= 10;
     y:= 10; 
     begin 
-      x := x + 1;  
-      end
-        y := x - 1;  
+      x := x + 1;
       begin
-      x := x + 1;  
+        y := x - 1
+      end;
+      x := x + 1
     end; 
  end;
 begin

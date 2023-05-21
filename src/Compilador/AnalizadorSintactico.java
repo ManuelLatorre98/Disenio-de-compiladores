@@ -62,7 +62,7 @@ public class AnalizadorSintactico {
             match("var");
             declaracion_variables();
             match(";");
-            while(true){//todo ; declaracion_variables esta de mas
+            while(true){
                 if(lookahead.getValor().equals("identificador")){
                     declaracion_variables();
                     match(";");
@@ -227,7 +227,6 @@ public class AnalizadorSintactico {
     void asignacion(){
         if(lookahead.getValor().equals(":=")){
             match(":=");
-            //match("="); //todo ACA
             expresion();
         }else{
             throw new SyntaxException("Syntax Exception: ':=' expected");
