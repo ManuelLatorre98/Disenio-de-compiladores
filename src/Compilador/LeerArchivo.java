@@ -6,14 +6,15 @@ import java.util.Scanner;
 public class LeerArchivo {
     
     private InputStreamReader input;
-    private Scanner sc;
+    private BufferedReader buffer;
     
     public LeerArchivo(InputStreamReader input){
         this.input = input;
+        this.buffer = new BufferedReader(input);
     } 
 
     public String getPrograma() throws IOException {
-        BufferedReader buffer = new BufferedReader(input);
+        //BufferedReader buffer = new BufferedReader(input);
         String line;
         StringBuilder resultStringBuilder = new StringBuilder();
         while((line = buffer.readLine())!=null) {
@@ -22,4 +23,9 @@ public class LeerArchivo {
         return resultStringBuilder.toString();
     }
 
+    public String getLine() throws IOException {
+        String line = buffer.readLine();
+        if(line == null) line = ""; 
+        return line;
+    }
 }

@@ -1,27 +1,28 @@
 package Compilador;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class AnalizadorSintactico {
     private Cabeza cabeza;
     private Automata automata;
     Token lookahead;
-    private String syntaxErrMsg = "Syntax error";
+
     public AnalizadorSintactico(String path){
         cabeza= new Cabeza();
         //todo manejar lo de obtener programa desde aca
         try{
-            InputStreamReader input = new InputStreamReader(Main.class.getResourceAsStream(path));
-            LeerArchivo archivo = new LeerArchivo(input);
-            String prog = archivo.getPrograma();
-            System.out.println(prog);
-            automata= new Automata(prog,cabeza);
+            //InputStreamReader input = new InputStreamReader(Main.class.getResourceAsStream(path));
+            //LeerArchivo archivo = new LeerArchivo(input);
+            //String line = archivo.getLine();
+            //System.out.println(line);
+            automata= new Automata(path,cabeza);
         }catch(Exception e){
             System.err.println("DEBE INGRESAR POR PARAMETRO LA RUTA DEL ARCHIVO DE TEXTO");
         }
 
     }
-    public void analizar(){
+    public void analizar() throws IOException{
         lookahead = automata.pedirSiguienteToken();
         if(lookahead==null){
             throw new SyntaxException("Programa vacio");
@@ -29,7 +30,7 @@ public class AnalizadorSintactico {
         programa();
     }
 
-    private void match(String string){
+    private void match(String string) throws IOException{
         if(lookahead==null){
             throw new SyntaxException("Syntax Exception: null");
         }
@@ -39,7 +40,7 @@ public class AnalizadorSintactico {
         lookahead = automata.pedirSiguienteToken();
     }
 
-    void programa(){
+    void programa() throws IOException{
         if(lookahead.getValor().equals("program")){
             match("program");
             match("identificador");
@@ -50,14 +51,20 @@ public class AnalizadorSintactico {
         }
     }
 
-    void bloque(){
-        seccion_declaracion_variables();
-        seccion_declaracion_subrutinas();
-        sentencia_compuesta();
+    void bloque() {
+        try {
+            seccion_declaracion_variables();
+            seccion_declaracion_subrutinas();
+            sentencia_compuesta();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
     }
 
     //DECLARACIONES
-    void seccion_declaracion_variables(){
+    void seccion_declaracion_variables() throws IOException{
         if(lookahead.getValor().equals("var")){
             match("var");
             declaracion_variables();
@@ -77,7 +84,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void declaracion_variables(){
+    void declaracion_variables() throws IOException{
         lista_identificadores();
         if(lookahead.getValor().equals(":")){
             match(":");
@@ -87,7 +94,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void lista_identificadores(){
+    void lista_identificadores() throws IOException{
         if(lookahead.getValor().equals("identificador")){
             match("identificador");
             while(true){
@@ -103,7 +110,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void tipo(){
+    void tipo() throws IOException{
         switch(lookahead.getValor()){//todo borramos match(";")
             case "integer" : match("integer"); break;
             case "boolean" : match("boolean"); break;
@@ -111,7 +118,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void seccion_declaracion_subrutinas(){
+    void seccion_declaracion_subrutinas() throws IOException{
         while(true){
             switch(lookahead.getValor()){
                 case "procedure" : declaracion_procedimiento(); match(";"); continue;
@@ -122,7 +129,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void declaracion_procedimiento(){
+    void declaracion_procedimiento() throws IOException{
         if(lookahead.getValor().equals("procedure")){
             match("procedure");
             match("identificador");
@@ -134,7 +141,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void declaracion_funcion(){
+    void declaracion_funcion() throws IOException{
         if(lookahead.getValor().equals("function")){
             match("function");
             match("identificador");
@@ -148,7 +155,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void parametros_formales(){
+    void parametros_formales() throws IOException{
         if(lookahead.getValor().equals("(")){
             match("(");
             seccion_parametros_formales();
@@ -166,7 +173,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void seccion_parametros_formales(){
+    void seccion_parametros_formales() throws IOException{
         lista_identificadores();
         if(lookahead.getValor().equals(":")){
             match(":");
@@ -177,7 +184,7 @@ public class AnalizadorSintactico {
     }
 
     //SENTENCIAS
-    void sentencia_compuesta(){
+    void sentencia_compuesta() throws IOException{
         if(lookahead.getValor().equals("begin")){
             match("begin");
             sentencia();
@@ -195,7 +202,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void sentencia(){
+    void sentencia() throws IOException{
         switch (lookahead.getValor()){
             case "identificador":
                 match("identificador");
@@ -215,7 +222,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void temp(){
+    void temp() throws IOException{
         if(lookahead.getValor().equals(":=")) {
             asignacion();
         }else{
@@ -224,7 +231,7 @@ public class AnalizadorSintactico {
 
     }
 
-    void asignacion(){
+    void asignacion() throws IOException{
         if(lookahead.getValor().equals(":=")){
             match(":=");
             expresion();
@@ -233,7 +240,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void llamada_procedimiento(){
+    void llamada_procedimiento() throws IOException{
         if(lookahead.getValor().equals("(")){
             match("(");
             lista_expresiones();
@@ -243,7 +250,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void sentencia_condicional(){
+    void sentencia_condicional() throws IOException{
         if(lookahead.getValor().equals("if")){
             match("if");
             expresion();
@@ -260,7 +267,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void sentencia_repetitiva(){
+    void sentencia_repetitiva() throws IOException{
         if(lookahead.getValor().equals("while")){
             match("while");
             expresion();
@@ -272,7 +279,7 @@ public class AnalizadorSintactico {
     }
 
     //EXPRESIONES
-    void lista_expresiones(){
+    void lista_expresiones() throws IOException{
         expresion();
         while(true){
             if(lookahead.getValor().equals(",")){
@@ -284,7 +291,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void expresion(){
+    void expresion() throws IOException{
         expresion_simple();
         if(lookahead.getValor().equals("=") || lookahead.getValor().equals("<") || lookahead.getValor().equals(">")){
             relacion();
@@ -292,7 +299,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void expresion_simple(){
+    void expresion_simple() throws IOException{
         if(lookahead.getValor().equals("+") || lookahead.getValor().equals("-")){
             if(lookahead.getValor().equals("+")) match("+");
             if(lookahead.getValor().equals("-")) match("-");
@@ -312,7 +319,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void relacion(){
+    void relacion() throws IOException{
         switch (lookahead.getValor()){
             case "=": match("="); break;
             case "<":
@@ -331,7 +338,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void termino(){
+    void termino() throws IOException{
         factor();
         while(true){
             if(lookahead.getValor().equals("*") || lookahead.getValor().equals("div") || lookahead.getValor().equals("and")){
@@ -347,7 +354,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void factor(){
+    void factor() throws IOException{
         switch(lookahead.getValor()){
             case "identificador":
                 match("identificador");
@@ -367,7 +374,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void llamada_funcion(){
+    void llamada_funcion() throws IOException{
         if(lookahead.getValor().equals("(")){
             match("(");
             lista_expresiones();
