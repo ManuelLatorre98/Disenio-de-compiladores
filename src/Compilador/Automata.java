@@ -10,7 +10,7 @@ public class Automata {
     private Token returnToken;
     private String programa;
     private boolean tokenEncontrado=false;
-
+    private int nroLinea=1;
     private HashMap<String, String> palabrasReservadas = new HashMap<>();
     private String[] palabras= {
             "program",
@@ -54,12 +54,14 @@ public class Automata {
             if(get_numero()) {tokenEncontrado=true; continue;}
             if(comentario()) {continue;}
             if(get_parentesis()){tokenEncontrado=true; continue;}
+            if(get_salto_linea()){continue;}
             if(get_punto()) break;
             error = true;//no fue reconocido
         }
         if(error){
-            throw new LexicalException("ERROR LEXICO: Caracter no perteneciente al alfabeto del lenguaje");
+            throw new LexicalException("ERROR LEXICO: (Linea "+nroLinea+"): Caracter no perteneciente al alfabeto del lenguaje");
         }
+        returnToken.setNroLinea(nroLinea);
         return returnToken;
     }
     private boolean get_operador_relacional(){
@@ -455,9 +457,22 @@ public class Automata {
             if(!exito)cabeza.moverCabezaDer(); //la cabeza deber quedarse a la derecha del ultimo caracter del lexema
         }//end_while
         if(!exito) cabeza.setCabeza(inicio_cabeza);
-        else if(cabeza.getCabeza() < programa.length()-1)System.out.println("WARNING: Caracteres ignorados despues del punto.");
 
         return exito;
     }
+
+    public boolean get_salto_linea(){
+        boolean flag = false;
+        char c = programa.charAt(cabeza.getCabeza());
+        if(((int)c == 10)){
+            cabeza.moverCabezaDer();
+            flag = true;
+            System.out.println("LINEA: "+nroLinea);
+            nroLinea++;
+
+        };
+        return flag;
+    }
+
 }
 

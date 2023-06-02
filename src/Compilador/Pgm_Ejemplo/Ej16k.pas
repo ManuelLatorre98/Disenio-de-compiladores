@@ -7,11 +7,11 @@ function algo(x, y:integer): integer;
     y:= 10; 
     begin 
       x := x + 1;
+      end
+        y := x - 1;
       begin
-        y := x - 1
-      end;
-      x := x + 1
-    end; 
+      x := x + 1;
+    end;
  end;
 begin
   a:=9;

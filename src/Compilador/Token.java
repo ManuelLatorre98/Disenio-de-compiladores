@@ -4,6 +4,8 @@ public class Token {
     private String nombre;
     private String valor;
 
+    private int nroLinea;
+
     public Token(String nombre){
         this.nombre=nombre;
     }
@@ -15,6 +17,9 @@ public class Token {
     public void setValor(String valor){
         this.valor=valor;
     }
+    public void setNroLinea(int nroLinea){
+        this.nroLinea=nroLinea;
+    }
 
     public String getNombre(){
         return nombre;
@@ -24,4 +29,7 @@ public class Token {
         return valor;
     }
 
+    public int getNroLinea(){
+        return this.nroLinea;
+    }
 }

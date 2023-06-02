@@ -1,1 +1,2 @@
-begin <= +- ; , =:=
+program prueba ;{ Archivo Prueba C&I: EJ22D.PAS }begin
+a:= 9 end.

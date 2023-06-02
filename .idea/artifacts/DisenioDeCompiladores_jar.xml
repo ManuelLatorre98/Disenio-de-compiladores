@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="Analizador">
-    <output-path>$PROJECT_DIR$/out/artifacts/Analizador</output-path>
+  <artifact type="jar" name="DisenioDeCompiladores:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/DisenioDeCompiladores_jar</output-path>
     <root id="archive" name="DisenioDeCompiladores.jar">
       <element id="module-output" name="DisenioDeCompiladores" />
     </root>

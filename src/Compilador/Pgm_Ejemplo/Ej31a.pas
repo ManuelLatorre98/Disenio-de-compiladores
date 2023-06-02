@@ -12,13 +12,13 @@ var
          then 
            begin
              a := 0 ;
-             c := false;
+             c := false
            end
          else 
            begin
              a := a + 1;
-             write( a );
-           end
-       write( a );
+             write( a )
+           end;
+       write( a )
  end.
 

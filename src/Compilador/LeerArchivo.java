@@ -16,9 +16,13 @@ public class LeerArchivo {
         BufferedReader buffer = new BufferedReader(input);
         String line;
         StringBuilder resultStringBuilder = new StringBuilder();
+        String x= "";
         while((line = buffer.readLine())!=null) {
             resultStringBuilder.append(line);
+            resultStringBuilder.append("\n");
+
         }
+
         return resultStringBuilder.toString();
     }
 

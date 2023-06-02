@@ -9,12 +9,11 @@ public class AnalizadorSintactico {
     private String syntaxErrMsg = "Syntax error";
     public AnalizadorSintactico(String path){
         cabeza= new Cabeza();
-        //todo manejar lo de obtener programa desde aca
         try{
             InputStreamReader input = new InputStreamReader(Main.class.getResourceAsStream(path));
             LeerArchivo archivo = new LeerArchivo(input);
             String prog = archivo.getPrograma();
-            System.out.println(prog);
+            //System.out.println(prog);
             automata= new Automata(prog,cabeza);
         }catch(Exception e){
             System.err.println("DEBE INGRESAR POR PARAMETRO LA RUTA DEL ARCHIVO DE TEXTO");
@@ -24,17 +23,17 @@ public class AnalizadorSintactico {
     public void analizar(){
         lookahead = automata.pedirSiguienteToken();
         if(lookahead==null){
-            throw new SyntaxException("Programa vacio");
+            throw new SyntaxException("Programa vacio",lookahead.getNroLinea());
         }
         programa();
     }
 
     private void match(String string){
         if(lookahead==null){
-            throw new SyntaxException("Syntax Exception: null");
+            throw new SyntaxException("Syntax Exception: null",lookahead.getNroLinea());
         }
         if(!lookahead.getValor().equals(string)){
-            throw new SyntaxException("Syntax Exception: '"+string+"' expected. Received '"+lookahead.getValor()+"'");
+            throw new SyntaxException("Syntax Exception: '"+string+"' expected. Received '"+lookahead.getValor()+"'",lookahead.getNroLinea());
         }
         lookahead = automata.pedirSiguienteToken();
     }
@@ -46,7 +45,7 @@ public class AnalizadorSintactico {
             match(";");
             bloque();
         }else{
-            throw new SyntaxException("Syntax Exception: 'program' expected");
+            throw new SyntaxException("Syntax Exception: 'program' expected",lookahead.getNroLinea());
         }
     }
 
@@ -70,10 +69,6 @@ public class AnalizadorSintactico {
                 }
                 break;
             }
-        }else{
-            //todo ACA
-            //throw new SyntaxException("Syntax Exception");
-            //lookahead = automata.pedirSiguienteToken();
         }
     }
 
@@ -83,7 +78,7 @@ public class AnalizadorSintactico {
             match(":");
             tipo();
         }else{
-            throw new SyntaxException("Syntax Exception: ':' expected");
+            throw new SyntaxException("Syntax Exception: ':' expected",lookahead.getNroLinea());
         }
     }
 
@@ -99,15 +94,15 @@ public class AnalizadorSintactico {
                 break;
             }
         }else {
-            throw new SyntaxException("Syntax Exception: 'identificador' expected");
+            throw new SyntaxException("Syntax Exception: 'identificador' expected",lookahead.getNroLinea());
         }
     }
 
     void tipo(){
-        switch(lookahead.getValor()){//todo borramos match(";")
+        switch(lookahead.getValor()){
             case "integer" : match("integer"); break;
             case "boolean" : match("boolean"); break;
-            default: throw new SyntaxException("Syntax Exception: 'integer/boolean' expected");
+            default: throw new SyntaxException("Syntax Exception: 'integer/boolean' expected",lookahead.getNroLinea());
         }
     }
 
@@ -130,7 +125,7 @@ public class AnalizadorSintactico {
             match(";");
             bloque();
         }else{
-            throw new SyntaxException("Syntax Exception: 'procedure' expected");
+            throw new SyntaxException("Syntax Exception: 'procedure' expected",lookahead.getNroLinea());
         }
     }
 
@@ -144,7 +139,7 @@ public class AnalizadorSintactico {
             match(";");
             bloque();
         }else{
-            throw new SyntaxException("Syntax Exception: 'function' expected");
+            throw new SyntaxException("Syntax Exception: 'function' expected",lookahead.getNroLinea());
         }
     }
 
@@ -156,13 +151,11 @@ public class AnalizadorSintactico {
                 if(lookahead.getValor().equals(";")){
                     match(";");
                     seccion_parametros_formales();
-                    continue; //todo continue
+                    continue;
                 }
                 break; //break
             }
             match(")");
-        }else{
-            //lookahead = automata.pedirSiguienteToken();
         }
     }
 
@@ -172,7 +165,7 @@ public class AnalizadorSintactico {
             match(":");
             tipo();
         }else{
-            throw new SyntaxException("Syntax Exception: ':' expected");
+            throw new SyntaxException("Syntax Exception: ':' expected",lookahead.getNroLinea());
         }
     }
 
@@ -191,7 +184,7 @@ public class AnalizadorSintactico {
             }
             match("end");
         }else{
-            throw new SyntaxException("Syntax Exception: 'begin' expected");
+            throw new SyntaxException("Syntax Exception: 'begin' expected",lookahead.getNroLinea());
         }
     }
 
@@ -211,7 +204,7 @@ public class AnalizadorSintactico {
                 sentencia_repetitiva();
                 break;
             default:
-                throw new SyntaxException("Syntax Exception: 'identificador/begin/if/while' expected");
+                throw new SyntaxException("Syntax Exception: 'identificador/begin/if/while' expected",lookahead.getNroLinea());
         }
     }
 
@@ -229,7 +222,7 @@ public class AnalizadorSintactico {
             match(":=");
             expresion();
         }else{
-            throw new SyntaxException("Syntax Exception: ':=' expected");
+            throw new SyntaxException("Syntax Exception: ':=' expected",lookahead.getNroLinea());
         }
     }
 
@@ -238,8 +231,6 @@ public class AnalizadorSintactico {
             match("(");
             lista_expresiones();
             match(")");
-        }else{
-            //lookahead = automata.pedirSiguienteToken();
         }
     }
 
@@ -252,11 +243,9 @@ public class AnalizadorSintactico {
             if(lookahead.getValor().equals("else")){
                 match("else");
                 sentencia();
-            }else{
-               // lookahead = automata.pedirSiguienteToken();
             }
         }else{
-            throw new SyntaxException("Syntax Exception: 'if' expected");
+            throw new SyntaxException("Syntax Exception: 'if' expected",lookahead.getNroLinea());
         }
     }
 
@@ -267,7 +256,7 @@ public class AnalizadorSintactico {
             match("do");
             sentencia();
         }else{
-            throw new SyntaxException("Syntax Exception: 'while' expected");
+            throw new SyntaxException("Syntax Exception: 'while' expected",lookahead.getNroLinea());
         }
     }
 
@@ -299,7 +288,7 @@ public class AnalizadorSintactico {
         }
         termino();
         while(true){
-            if(lookahead.getValor().equals("+") || lookahead.equals("-") || lookahead.getValor().equals("or")){
+            if(lookahead.getValor().equals("+") || lookahead.getValor().equals("-") || lookahead.getValor().equals("or")){
                 switch(lookahead.getValor()){
                     case "+": match("+"); break;
                     case "-": match("-"); break;
@@ -327,7 +316,7 @@ public class AnalizadorSintactico {
                 if(lookahead.getValor().equals("=")) match("=");
                 break;
             default:
-                throw new SyntaxException("Syntax Exception: '=/</>' expected");
+                throw new SyntaxException("Syntax Exception: '=/</>' expected",lookahead.getNroLinea());
         }
     }
 
@@ -363,14 +352,16 @@ public class AnalizadorSintactico {
             case "true": match("true"); break;
             case "false": match("false"); break;
             default:
-                throw new SyntaxException("Syntax Exception: 'identificador/numero/(/not/true/false' expected");
+                throw new SyntaxException("Syntax Exception: 'identificador/numero/(/not/true/false' expected",lookahead.getNroLinea());
         }
     }
 
     void llamada_funcion(){
         if(lookahead.getValor().equals("(")){
             match("(");
-            lista_expresiones();
+            if(!lookahead.getValor().equals(")")){
+                lista_expresiones();
+            }
             match(")");
         }
     }

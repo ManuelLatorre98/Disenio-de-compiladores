@@ -8,6 +8,6 @@ var
    c:= true;
    if a
      then write( a )
-     else write( a + 10 );
+     else write( a + 10 )
  end.
 
