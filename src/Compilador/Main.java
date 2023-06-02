@@ -13,7 +13,7 @@ public class Main {
         //String programa = "begin <= +- ; , {}=:=";
         //String programa = ">";
         //args[0]
-        String programa;
+        //String programa;
         AnalizadorSintactico syntax = new AnalizadorSintactico(args[0]);
         syntax.analizar();
        /* try{

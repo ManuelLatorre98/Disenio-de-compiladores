@@ -1,19 +1,20 @@
 package Compilador;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
 public class AnalizadorSintactico {
     private Cabeza cabeza;
     private Automata automata;
     Token lookahead;
-    private String syntaxErrMsg = "Syntax error";
+    
     public AnalizadorSintactico(String path){
         cabeza= new Cabeza();
         try{
-            InputStreamReader input = new InputStreamReader(Main.class.getResourceAsStream(path));
-            LeerArchivo archivo = new LeerArchivo(input);
+            File file = new File(path);
+            LeerArchivo archivo = new LeerArchivo(file);
             String prog = archivo.getPrograma();
-            //System.out.println(prog);
             automata= new Automata(prog,cabeza);
         }catch(Exception e){
             System.err.println("DEBE INGRESAR POR PARAMETRO LA RUTA DEL ARCHIVO DE TEXTO");

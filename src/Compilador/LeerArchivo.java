@@ -5,18 +5,18 @@ import java.util.Scanner;
 
 public class LeerArchivo {
     
-    private InputStreamReader input;
-    private Scanner sc;
+    private File input;
+    //private Scanner sc;
     
-    public LeerArchivo(InputStreamReader input){
+    public LeerArchivo(File input){
         this.input = input;
     } 
 
     public String getPrograma() throws IOException {
-        BufferedReader buffer = new BufferedReader(input);
+        BufferedReader buffer = new BufferedReader(new FileReader(input));
         String line;
         StringBuilder resultStringBuilder = new StringBuilder();
-        String x= "";
+        //String x= "";
         while((line = buffer.readLine())!=null) {
             resultStringBuilder.append(line);
             resultStringBuilder.append("\n");
