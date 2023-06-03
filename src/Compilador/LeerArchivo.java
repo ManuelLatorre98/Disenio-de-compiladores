@@ -1,31 +1,24 @@
 package Compilador;
 
 import java.io.*;
-import java.util.Scanner;
 
 public class LeerArchivo {
     
-    private InputStreamReader input;
-    private BufferedReader buffer;
-    
-    public LeerArchivo(InputStreamReader input){
-        this.input = input;
-        this.buffer = new BufferedReader(input);
+    private File input;
+    private BufferedReader reader;
+    public LeerArchivo(String path){
+        this.input = new File(path);
+        try {
+            this.reader = new BufferedReader(new FileReader(input));
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     } 
 
-    public String getPrograma() throws IOException {
-        //BufferedReader buffer = new BufferedReader(input);
-        String line;
-        StringBuilder resultStringBuilder = new StringBuilder();
-        while((line = buffer.readLine())!=null) {
-            resultStringBuilder.append(line);
-        }
-        return resultStringBuilder.toString();
-    }
-
     public String getLine() throws IOException {
-        String line = buffer.readLine();
-        if(line == null) line = ""; 
+        String line = reader.readLine();
+        if(line == null) line = "";
         return line;
     }
 }

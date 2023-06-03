@@ -1,15 +1,14 @@
 package Compilador;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.rmi.server.RemoteStub;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Automata {
-    // private int cabeza=0;
+
     private Cabeza cabeza;
-    private ArrayList<Token> tokenList = new ArrayList<Token>();
     private Token returnToken;
     private LeerArchivo archivo;
     private String line;
@@ -36,10 +35,8 @@ public class Automata {
     };
 
     public Automata(String path, Cabeza cab) throws Exception {
-        InputStreamReader input = new InputStreamReader(Main.class.getResourceAsStream(path));
-        this.archivo = new LeerArchivo(input);
+        this.archivo = new LeerArchivo(path);
         this.line = archivo.getLine() + " ";
-        System.out.println(line);
         this.cabeza = cab;
         for (String palabra : palabras) { // Carga lista de palabras reservadas
             palabrasReservadas.put(palabra, palabra);
@@ -50,65 +47,25 @@ public class Automata {
         boolean error = false;
         tokenEncontrado = false;
         returnToken = null;
-        if (cabeza.getCabeza() == line.length() - 1) {// pido siguiente linea de codigo desde el archivo fuente del
-                                                      // programa
-            boolean exito = getNextLine();
-            if (!exito) {
-                System.out.println("INVOCAR sintaxis error del lado del analizador sintactico");
-            }
-        }
+        getNextLine();
         while (!error && !tokenEncontrado && cabeza.getCabeza() < line.length()) {
-            if (!leer_blancos())
-                break;
-            if (get_operador_relacional()) {
-                tokenEncontrado = true;
-                continue;
-            }
-            if (get_operador_aritmetico()) {
-                tokenEncontrado = true;
-                continue;
-            }
-            if (get_asignacion()) {
-                tokenEncontrado = true;
-                continue;
-            }
-            if (get_punto_coma()) {
-                tokenEncontrado = true;
-                continue;
-            }
-            if (get_coma()) {
-                tokenEncontrado = true;
-                continue;
-            }
-            if (get_identificador()) {
-                tokenEncontrado = true;
-                continue;
-            }
-            if (get_numero()) {
-                tokenEncontrado = true;
-                continue;
-            }
+            if (!leer_blancos())break;
+            if (get_operador_relacional()) {tokenEncontrado = true; continue;}
+            if (get_operador_aritmetico()) {tokenEncontrado = true; continue;}
+            if (get_asignacion()) {tokenEncontrado = true; continue;}
+            if (get_punto_coma()) {tokenEncontrado = true; continue;}
+            if (get_coma()) {tokenEncontrado = true; continue;}
+            if (get_identificador()) {tokenEncontrado = true; continue;}
+            if (get_numero()) {tokenEncontrado = true; continue;}
             if (comentario()) {
-                System.out.println("POS ACTUAL CABEZA: "+cabeza.getCabeza());
-                if (cabeza.getCabeza() == line.length() ) {// pido siguiente linea de codigo desde el archivo fuente del programa
-                    boolean exito = getNextLine();
-                    if (!exito) {
-                        System.out.println("INVOCAR sintaxis error del lado del analizador sintactico");
-                    }
-                }
+                getNextLine();
                 continue;
             }
-            if (get_parentesis()) {
-                tokenEncontrado = true;
-                continue;
+            if (get_parentesis()) {tokenEncontrado = true; continue;}
+            if (get_punto())break; error = true;}// no fue reconocido
+            if (error) {
+                throw new LexicalException("Lexical Exception ["+cabeza.getLine()+","+cabeza.getCabeza()+"]: Caracter no perteneciente al alfabeto del lenguaje");
             }
-            if (get_punto())
-                break;
-            error = true;// no fue reconocido
-        }
-        if (error) {
-            throw new LexicalException("ERROR LEXICO: Caracter no perteneciente al alfabeto del lenguaje");
-        }
         return returnToken;
     }
 
@@ -504,9 +461,7 @@ public class Automata {
         return flag;
     }
 
-    public void print_lexema_token(String lexema, String token) {
-        System.out.println("Lexema: " + lexema + " Token: " + token);
-    }
+   
 
     private boolean get_numero() {
         boolean exito = false;
@@ -588,11 +543,19 @@ public class Automata {
 
     private boolean getNextLine() throws IOException {
         boolean exito = true;
+        leer_blancos();
         if (cabeza.getCabeza() == line.length() - 1) {
-            line = archivo.getLine();
-            if (line == "")
+            line = archivo.getLine() + " ";
+            //System.out.println("SALTO DE LINEA desde:" +cabeza.getLine()+ "hacia:"+ (int)(cabeza.getLine()+1));
+            cabeza.setCabeza(0);
+            cabeza.saltoLinea();
+            if (line == " ")
                 exito = false;
         }
         return exito;
+    }
+
+    public void print_lexema_token(String lexema, String token) {
+        System.out.println("Lexema: " + lexema + " Token: " + token);
     }
 }
