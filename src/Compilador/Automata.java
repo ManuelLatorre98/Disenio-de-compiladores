@@ -140,7 +140,7 @@ public class Automata {
         if (exito) {
             // tokenList.add(op_relacional_token);
             returnToken = op_relacional_token;
-            print_lexema_token(lexema, op_relacional_token.getNombre());
+            //print_lexema_token(lexema, op_relacional_token.getNombre());
         } else {
             cabeza.setCabeza(inicio_cabeza);
         }
@@ -197,7 +197,7 @@ public class Automata {
         if (exito) {
             // tokenList.add(op_artimetico_token);
             returnToken = op_artimetico_token;
-            print_lexema_token(lexema, op_artimetico_token.getNombre());
+            //print_lexema_token(lexema, op_artimetico_token.getNombre());
         } else {
             cabeza.setCabeza(inicio_cabeza);
         }
@@ -230,7 +230,7 @@ public class Automata {
                         // tokenList.add(token);
                         token.setValor(":");
                         returnToken = token;
-                        print_lexema_token(lexema, token.getNombre());
+                        //print_lexema_token(lexema, token.getNombre());
                     }
                     break;
                 case 2:
@@ -239,7 +239,7 @@ public class Automata {
                     // tokenList.add(token);
                     token.setValor(":=");
                     returnToken = token;
-                    print_lexema_token(lexema, token.getNombre());
+                    //print_lexema_token(lexema, token.getNombre());
                     break;
                 default:
                     not_stop = false;
@@ -276,7 +276,7 @@ public class Automata {
                     // tokenList.add(token);
                     token.setValor(";");
                     returnToken = token;
-                    print_lexema_token(lexema, token.getNombre());
+                    //print_lexema_token(lexema, token.getNombre());
                     break;
                 default:
                     not_stop = false;
@@ -313,7 +313,7 @@ public class Automata {
                     // tokenList.add(token);
                     token.setValor(",");
                     returnToken = token;
-                    print_lexema_token(lexema, token.getNombre());
+                    //print_lexema_token(lexema, token.getNombre());
                     break;
                 default:
                     not_stop = false;
@@ -351,7 +351,7 @@ public class Automata {
                     // tokenList.add(token);
                     token.setValor(".");
                     returnToken = token;
-                    print_lexema_token(lexema, token.getNombre());
+                    //print_lexema_token(lexema, token.getNombre());
                     break;
                 default:
                     not_stop = false;
@@ -397,7 +397,7 @@ public class Automata {
                         }
                         // tokenList.add(token);
                         returnToken = token;
-                        print_lexema_token(lexema, token.getNombre());
+                        //print_lexema_token(lexema, token.getNombre());
                     } else
                         not_stop = false;
                     break;
@@ -434,7 +434,7 @@ public class Automata {
                     break;
                 case 2:
                     exito = true;
-                    print_lexema_token(lexema, "COMENTARIO-NO HAY TOKEN");
+                    //print_lexema_token(lexema, "COMENTARIO-NO HAY TOKEN");
                     break;
                 default:
                     not_stop = false;
@@ -487,7 +487,7 @@ public class Automata {
                         exito = true;
                         token.setValor("numero");
                         returnToken = token;
-                        print_lexema_token(lexema, token.getNombre());
+                        //print_lexema_token(lexema, token.getNombre());
                     } else
                         not_stop = false;
                     break;
@@ -525,7 +525,7 @@ public class Automata {
                     // tokenList.add(token);
                     token.setValor(lexema);
                     returnToken = token;
-                    print_lexema_token(lexema, token.getNombre());
+                    //print_lexema_token(lexema, token.getNombre());
                     break;
                 default:
                     not_stop = false;
