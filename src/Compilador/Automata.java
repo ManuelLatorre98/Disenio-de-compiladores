@@ -452,7 +452,7 @@ public class Automata {
     public boolean leer_blancos() {
         boolean flag = cabeza.getCabeza() + 1 < line.length();
         char c = line.charAt(cabeza.getCabeza());
-        while (c == ' ' && flag) {
+        while ((c == ' ' || ((int)c == 9))  && flag) {
             cabeza.moverCabezaDer();
             c = line.charAt(cabeza.getCabeza());
             flag = cabeza.getCabeza() + 1 < line.length();
