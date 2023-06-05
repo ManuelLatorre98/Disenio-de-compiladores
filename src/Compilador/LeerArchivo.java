@@ -18,7 +18,8 @@ public class LeerArchivo {
 
     public String getLine() throws IOException {
         String line = reader.readLine();
-        if(line == null) line = "";
+        //System.out.println("Line:" + line);
+        //if(line == null ) { line = "";}
         return line;
     }
 }

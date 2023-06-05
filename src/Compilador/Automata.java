@@ -197,7 +197,7 @@ public class Automata {
         if (exito) {
             // tokenList.add(op_artimetico_token);
             returnToken = op_artimetico_token;
-            //print_lexema_token(lexema, op_artimetico_token.getNombre());
+           //print_lexema_token(lexema, op_artimetico_token.getNombre());
         } else {
             cabeza.setCabeza(inicio_cabeza);
         }
@@ -457,7 +457,6 @@ public class Automata {
             c = line.charAt(cabeza.getCabeza());
             flag = cabeza.getCabeza() + 1 < line.length();
         }
-        ;
         return flag;
     }
 
@@ -544,13 +543,16 @@ public class Automata {
     private boolean getNextLine() throws IOException {
         boolean exito = true;
         leer_blancos();
-        if (cabeza.getCabeza() == line.length() - 1) {
-            line = archivo.getLine() + " ";
+        while (exito && cabeza.getCabeza() == line.length() - 1 ) {
+            line = archivo.getLine();
             //System.out.println("SALTO DE LINEA desde:" +cabeza.getLine()+ "hacia:"+ (int)(cabeza.getLine()+1));
             cabeza.setCabeza(0);
-            cabeza.saltoLinea();
-            if (line == " ")
+            cabeza.saltoLinea();   
+            if (line == null){
                 exito = false;
+                line = "";
+            }
+            line+=" ";        
         }
         return exito;
     }
