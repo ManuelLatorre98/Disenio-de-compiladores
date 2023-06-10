@@ -49,7 +49,7 @@ public class Automata {
         returnToken = null;
         getNextLine();
         while (!error && !tokenEncontrado && cabeza.getCabeza() < line.length()) {
-            if (!leer_blancos())break;
+            if (!leer_blancos()){getNextLine(); continue;}
             if (get_operador_relacional()) {tokenEncontrado = true; continue;}
             if (get_operador_aritmetico()) {tokenEncontrado = true; continue;}
             if (get_asignacion()) {tokenEncontrado = true; continue;}
@@ -534,8 +534,8 @@ public class Automata {
         } // end_while
         if (!exito)
             cabeza.setCabeza(inicio_cabeza);
-        else if (cabeza.getCabeza() < line.length() - 1)
-            System.out.println("WARNING: Caracteres ignorados despues del punto.");
+        //else if (cabeza.getCabeza() < line.length() - 1)
+        //    System.out.println("WARNING: Caracteres ignorados despues del punto.");
 
         return exito;
     }
@@ -551,8 +551,9 @@ public class Automata {
             if (line == null){
                 exito = false;
                 line = "";
-            }
-            line+=" ";        
+            }else{
+                line+=" ";
+            }        
         }
         return exito;
     }

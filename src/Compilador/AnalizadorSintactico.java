@@ -42,6 +42,7 @@ public class AnalizadorSintactico {
             match(";");
             bloque();
             match(".");
+            System.out.println("The program is syntactically correct!");
         }else{
             throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'program' expected");
         }
