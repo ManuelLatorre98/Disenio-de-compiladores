@@ -2,10 +2,12 @@ package Compilador;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 public class AnalizadorSintactico {
     private Cabeza cabeza;
     private Automata automata;
+    private Env top;
     Token lookahead;
 
     public AnalizadorSintactico(String path){
@@ -40,6 +42,7 @@ public class AnalizadorSintactico {
             match("program");
             match("identificador");
             match(";");
+            this.top= new Env(null); //todo creamos el env inicial
             bloque();
             match(".");
             System.out.println("The program is syntactically correct!");
@@ -57,7 +60,7 @@ public class AnalizadorSintactico {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
+
     }
 
     //DECLARACIONES
@@ -78,22 +81,30 @@ public class AnalizadorSintactico {
     }
 
     void declaracion_variables() throws IOException{
-        lista_identificadores();
+        ArrayList<String> ids = lista_identificadores();
         if(lookahead.getValor().equals(":")){
             match(":");
-            tipo();
+            String lexema= tipo();
+            for (int i = 0; i < ids.size(); i++) {
+                Symbol symb = new Symbol();
+                symb.setTipo(lexema); //Creacion de simbolo
+                top.put(ids.get(i), symb);//Creacion de la entrada en la TS
+            }
         }else{
             throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: ':' expected");
         }
     }
 
-    void lista_identificadores() throws IOException{
+    ArrayList<String> lista_identificadores() throws IOException{
+        ArrayList<String> ids= new ArrayList<String>();
         if(lookahead.getValor().equals("identificador")){
             match("identificador");
+            ids.add(lookahead.getNombre());
             while(true){
                 if(lookahead.getValor().equals(",")){
                     match(",");
                     match("identificador");
+                    ids.add(lookahead.getNombre());
                     continue;
                 }
                 break;
@@ -101,14 +112,17 @@ public class AnalizadorSintactico {
         }else {
             throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'identificador' expected");
         }
+        return ids;
     }
 
-    void tipo() throws IOException{
+    String tipo() throws IOException{
+        String nombre = lookahead.getNombre();
         switch(lookahead.getValor()){//todo borramos match(";")
             case "integer" : match("integer"); break;
             case "boolean" : match("boolean"); break;
             default: throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'integer/boolean' expected");
         }
+        return nombre;
     }
 
     void seccion_declaracion_subrutinas() throws IOException{
@@ -178,6 +192,8 @@ public class AnalizadorSintactico {
     void sentencia_compuesta() throws IOException{
         if(lookahead.getValor().equals("begin")){
             match("begin");
+            Env save = top;
+            top = new Env(top);
             sentencia();
             while(true){
                 if(lookahead.getValor().equals(";")){
@@ -188,6 +204,7 @@ public class AnalizadorSintactico {
                 break;
             }
             match("end");
+            top= save;
         }else{
             throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'begin' expected");
         }
@@ -373,5 +390,5 @@ public class AnalizadorSintactico {
         }
     }
 
-  
+
 }
