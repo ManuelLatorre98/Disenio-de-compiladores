@@ -2,8 +2,9 @@ package Compilador;
 
 public class Main {
     public static void main(String[] args)  {
-        
-        AnalizadorSintactico syntax = new AnalizadorSintactico(args[0]);
+      
+        //AnalizadorSintactico syntax = new AnalizadorSintactico(args[0]);
+        AnalizadorSintactico syntax = new AnalizadorSintactico("./disenio-de-compiladores/src/Compilador/test.txt");
         try {
             syntax.analizar();
         } catch (Exception e) {

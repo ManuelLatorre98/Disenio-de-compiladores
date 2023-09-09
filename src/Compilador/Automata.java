@@ -393,7 +393,8 @@ public class Automata {
                             token.setNombre(lexema);
                             token.setValor(lexema);
                         } else { //todo borrar si funciona
-                            token.setValor(lexema);
+                            token.setValor("identificador");
+                            token.setLexema(lexema);
                         }
                         // tokenList.add(token);
                         returnToken = token;

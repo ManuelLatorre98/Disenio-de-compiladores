@@ -102,12 +102,12 @@ public class AnalizadorSintactico {
     ArrayList<String> lista_identificadores() throws IOException{
         ArrayList<String> ids= new ArrayList<String>();
         if(lookahead.getNombre().equals("identificador")){
-            ids.add(lookahead.getValor());
+            ids.add(lookahead.getLexema());
             match("identificador");
             while(true){
                 if(lookahead.getValor().equals(",")){
                     match(",");
-                    ids.add(lookahead.getValor());
+                    ids.add(lookahead.getLexema());
                     match("identificador");
                     continue;
                 }
