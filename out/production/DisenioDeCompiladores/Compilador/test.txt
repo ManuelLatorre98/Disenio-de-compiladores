@@ -1,0 +1,7 @@
+program prueba ;{ Archivo Prueba C&I: EJ20C.PAS }
+var
+  a, b: integer;
+  c, d: boolean;
+begin
+  a:=2
+end.

@@ -1,7 +1,6 @@
 package Compilador;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class AnalizadorSintactico {
@@ -43,8 +42,10 @@ public class AnalizadorSintactico {
             match("identificador");
             match(";");
             this.top= new Env(null); //todo creamos el env inicial
+            System.out.println("{");
             bloque();
             match(".");
+            System.out.println("}");
             System.out.println("The program is syntactically correct!");
         }else{
             throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'program' expected");
@@ -84,10 +85,13 @@ public class AnalizadorSintactico {
         ArrayList<String> ids = lista_identificadores();
         if(lookahead.getValor().equals(":")){
             match(":");
-            String lexema= tipo();
+            String lexemaTipoDato= tipo();
             for (int i = 0; i < ids.size(); i++) {
                 Symbol symb = new Symbol();
-                symb.setTipo(lexema); //Creacion de simbolo
+                symb.putAtributo("tipo","var");
+                symb.putAtributo("tipoDato", lexemaTipoDato);
+                symb.putAtributo("nombre", ids.get(i)); //todo nombre seria atributo o no?
+                System.out.println(ids.get(i)+": "+ lexemaTipoDato+";");
                 top.put(ids.get(i), symb);//Creacion de la entrada en la TS
             }
         }else{
@@ -97,14 +101,14 @@ public class AnalizadorSintactico {
 
     ArrayList<String> lista_identificadores() throws IOException{
         ArrayList<String> ids= new ArrayList<String>();
-        if(lookahead.getValor().equals("identificador")){
+        if(lookahead.getNombre().equals("identificador")){
+            ids.add(lookahead.getValor());
             match("identificador");
-            ids.add(lookahead.getNombre());
             while(true){
                 if(lookahead.getValor().equals(",")){
                     match(",");
+                    ids.add(lookahead.getValor());
                     match("identificador");
-                    ids.add(lookahead.getNombre());
                     continue;
                 }
                 break;
@@ -194,6 +198,7 @@ public class AnalizadorSintactico {
             match("begin");
             Env save = top;
             top = new Env(top);
+            System.out.println("{");
             sentencia();
             while(true){
                 if(lookahead.getValor().equals(";")){
@@ -204,6 +209,7 @@ public class AnalizadorSintactico {
                 break;
             }
             match("end");
+            System.out.println("}");
             top= save;
         }else{
             throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'begin' expected");

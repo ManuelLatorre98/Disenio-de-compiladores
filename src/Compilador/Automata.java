@@ -392,8 +392,8 @@ public class Automata {
                         if (palabrasReservadas.containsKey(lexema)) {
                             token.setNombre(lexema);
                             token.setValor(lexema);
-                        } else {
-                            token.setValor("identificador");
+                        } else { //todo borrar si funciona
+                            token.setValor(lexema);
                         }
                         // tokenList.add(token);
                         returnToken = token;
