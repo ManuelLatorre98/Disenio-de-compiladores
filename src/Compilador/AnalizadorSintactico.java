@@ -142,13 +142,17 @@ public class AnalizadorSintactico {
 
     void declaracion_procedimiento() throws IOException{
         if(lookahead.getValor().equals("procedure")){
+            ArrayList<Symbol> ids;
+            Symbol symb =new Symbol();
+            match("procedure");
+            symb.putAtributo("tipo","procedure");
+            symb.putAtributo("nombre",lookahead.getLexema());
+            match("identificador");
+            ids=parametros_formales();
+            match(";");
             Env save = top;
             top = new Env(top);
             System.out.println("{");
-            match("procedure");
-            match("identificador");
-            parametros_formales();
-            match(";");
             bloque();
             System.out.println("}");
             top= save;
@@ -159,15 +163,16 @@ public class AnalizadorSintactico {
 
     void declaracion_funcion() throws IOException{
         if(lookahead.getValor().equals("function")){
-            Env save = top;
-            top = new Env(top);
-            System.out.println("{");
+
             match("function");
             match("identificador");
             parametros_formales();
             match(":");
             tipo();
             match(";");
+            Env save = top;
+            top = new Env(top);
+            System.out.println("{");
             bloque();
             System.out.println("}");
             top= save;

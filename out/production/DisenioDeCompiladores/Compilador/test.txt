@@ -2,6 +2,14 @@ program prueba ;{ Archivo Prueba C&I: EJ20C.PAS }
 var
   a, b: integer;
   c, d: boolean;
+
+procedure Escribirasteriscos;
+var
+    i: integer;
 begin
+    i:= 2
+end;
+begin
+
   a:=2
 end.
