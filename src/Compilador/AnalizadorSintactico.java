@@ -142,11 +142,16 @@ public class AnalizadorSintactico {
 
     void declaracion_procedimiento() throws IOException{
         if(lookahead.getValor().equals("procedure")){
+            Env save = top;
+            top = new Env(top);
+            System.out.println("{");
             match("procedure");
             match("identificador");
             parametros_formales();
             match(";");
             bloque();
+            System.out.println("}");
+            top= save;
         }else{
             throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'procedure' expected");
         }
@@ -154,6 +159,9 @@ public class AnalizadorSintactico {
 
     void declaracion_funcion() throws IOException{
         if(lookahead.getValor().equals("function")){
+            Env save = top;
+            top = new Env(top);
+            System.out.println("{");
             match("function");
             match("identificador");
             parametros_formales();
@@ -161,6 +169,8 @@ public class AnalizadorSintactico {
             tipo();
             match(";");
             bloque();
+            System.out.println("}");
+            top= save;
         }else{
             throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'function' expected");
         }
@@ -196,9 +206,9 @@ public class AnalizadorSintactico {
     void sentencia_compuesta() throws IOException{
         if(lookahead.getValor().equals("begin")){
             match("begin");
-            Env save = top;
-            top = new Env(top);
-            System.out.println("{");
+            //Env save = top;
+            //top = new Env(top);
+            //System.out.println("{");
             sentencia();
             while(true){
                 if(lookahead.getValor().equals(";")){
@@ -209,8 +219,8 @@ public class AnalizadorSintactico {
                 break;
             }
             match("end");
-            System.out.println("}");
-            top= save;
+            //System.out.println("}");
+            //top= save;
         }else{
             throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'begin' expected");
         }
