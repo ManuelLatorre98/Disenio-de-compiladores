@@ -93,7 +93,12 @@ public class AnalizadorSintactico {
                 symb.putAtributo("tipoDato", lexemaTipoDato);
                 symb.putAtributo("nombre", ids.get(i)); //todo nombre seria atributo o no?
                 System.out.println(ids.get(i)+": "+ lexemaTipoDato+";");
-                top.put(ids.get(i), symb);//Creacion de la entrada en la TS
+                if(!top.colisionTipos(symb)){
+                    top.put(ids.get(i), symb);//Creacion de la entrada en la TS
+                }else{
+                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated var names: "+ids.get(i));
+                }
+                
             }
         }else{
             throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: ':' expected");
@@ -163,7 +168,13 @@ public class AnalizadorSintactico {
                 System.out.println("arg"+i + ": " + symbProc.getAtributo("arg"+i));
             }
 
-            top.put(symbProc.getAtributo("nombre"), symbProc);
+            if(!top.colisionTipos(symbProc)){//si no hay colision de tipos en la TS
+                //insetar simbolo de procedimiento en la TS
+                top.put(symbProc.getAtributo("nombre"), symbProc);
+            }else{
+                throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated procedure names: "+symbProc.getAtributo("nombre"));
+            }
+            
 
             System.out.println(")");
 
@@ -174,7 +185,12 @@ public class AnalizadorSintactico {
 
             //Insertar en TS cada var (parametro)
             for (Symbol temp : params) {
-                top.put(temp.getAtributo("nombre"), temp);
+                if(!top.colisionTipos(temp)){
+                    top.put(temp.getAtributo("nombre"), temp);    
+                }else{
+                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated var names: "+temp.getAtributo("nombre"));
+                }
+                
             }
 
             System.out.println("{");
@@ -217,15 +233,22 @@ public class AnalizadorSintactico {
             symbFunc.putAtributo("tipoRetorno", tipoRetorno);
             match(";");
 
-            //Inserto en TS entrada para funcion
-            top.put(symbFunc.getAtributo("nombre"), symbFunc);
-
+            if(!top.colisionTipos(symbFunc)){
+                //Inserto en TS entrada para funcion
+                top.put(symbFunc.getAtributo("nombre"), symbFunc);
+            }else{
+                throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated function names: "+symbFunc.getAtributo("nombre"));
+            }
             Env save = top;
             top = new Env(top);
 
             //Insertar en TS cada var (parametro)
             for (Symbol temp : params) {
-                top.put(temp.getAtributo("nombre"), temp);
+                if(!top.colisionTipos(temp)){
+                    top.put(temp.getAtributo("nombre"), temp);
+                }else{
+                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated var names: "+temp.getAtributo("nombre"));
+                }
             }
 
             System.out.println("{");

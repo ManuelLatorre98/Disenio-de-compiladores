@@ -3,11 +3,11 @@ import java.util.HashMap;
 import java.util.Hashtable;
 
 public class Env {
-    private Hashtable table;
+    private Hashtable<String,Symbol> table;
     protected Env prev;
 
     public Env(Env p) {
-        table = new Hashtable();
+        table = new Hashtable<String,Symbol>();
         prev = p;
     }
 
@@ -21,5 +21,16 @@ public class Env {
             if (found != null) return found;
         }
         return null;
+    }
+
+    public boolean colisionTipos(Symbol symb){
+        boolean resultado = false;
+        if(this.table.containsKey(symb.getAtributo("nombre"))){
+            Symbol colision = (Symbol)this.table.get((symb.getAtributo("nombre"))); 
+            if(symb.getAtributo("tipo").equals(colision.getAtributo("tipo"))){
+                resultado = true;
+            }
+        }
+        return resultado;
     }
 }

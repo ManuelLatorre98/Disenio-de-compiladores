@@ -3,7 +3,14 @@ var
   a, b: integer;
   c, d: boolean;
 
-procedure Escribirasteriscos;
+procedure b;
+var
+    i: integer;
+begin
+    i:= 2
+end;
+
+procedure m;
 var
     i: integer;
 begin
