@@ -1,6 +1,7 @@
 package Compilador;
 
 import java.io.IOException;
+import java.sql.Array;
 import java.util.ArrayList;
 
 public class AnalizadorSintactico {
@@ -141,20 +142,45 @@ public class AnalizadorSintactico {
     }
 
     void declaracion_procedimiento() throws IOException{
+        ArrayList<Symbol> params;
         if(lookahead.getValor().equals("procedure")){
-            ArrayList<Symbol> ids;
-            Symbol symb =new Symbol();
+            Symbol symbProc =new Symbol();
             match("procedure");
-            symb.putAtributo("tipo","procedure");
-            symb.putAtributo("nombre",lookahead.getLexema());
+
+            symbProc.putAtributo("tipo","procedure");
+            symbProc.putAtributo("nombre",lookahead.getLexema());
+
             match("identificador");
-            ids=parametros_formales();
+
+            params=parametros_formales();
+            symbProc.putAtributo("cantidadParametros", Integer.toString(params.size()));
+
+            System.out.println(symbProc.getAtributo("nombre")+"(");
+
+            //Insertar info de tipos de parametros
+            for (int i = 0; i < params.size(); i++) {
+                symbProc.putAtributo("arg"+i, params.get(i).getAtributo("tipoDato")); //todo: si se necesita mas info sobre arg, crear symb?
+                System.out.println("arg"+i + ": " + symbProc.getAtributo("arg"+i));
+            }
+
+            top.put(symbProc.getAtributo("nombre"), symbProc);
+
+            System.out.println(")");
+
             match(";");
+
             Env save = top;
             top = new Env(top);
+
+            //Insertar en TS cada var (parametro)
+            for (Symbol temp : params) {
+                top.put(temp.getAtributo("nombre"), temp);
+            }
+
             System.out.println("{");
             bloque();
             System.out.println("}");
+
             top= save;
         }else{
             throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'procedure' expected");
@@ -162,16 +188,46 @@ public class AnalizadorSintactico {
     }
 
     void declaracion_funcion() throws IOException{
+        ArrayList<Symbol> params;
+        Symbol symbFunc = new Symbol();
         if(lookahead.getValor().equals("function")){
-
             match("function");
+
+            symbFunc.putAtributo("tipo", "function");
+            symbFunc.putAtributo("nombre", lookahead.getLexema());
+
             match("identificador");
-            parametros_formales();
+
+            params = parametros_formales();
+
+            symbFunc.putAtributo("cantidadParametros", Integer.toString(params.size()));
+
+            System.out.println(symbFunc.getAtributo("nombre")+"(");
+
+            //Insertar info de tipos de parametros
+            for (int i = 0; i < params.size(); i++) {
+                symbFunc.putAtributo("arg"+i, params.get(i).getAtributo("tipoDato")); //todo: si se necesita mas info sobre arg, crear symb?
+                System.out.println("arg"+i + ": " + symbFunc.getAtributo("arg"+i));
+            }
+
+            System.out.println(")");
+
             match(":");
-            tipo();
+            String tipoRetorno = tipo();
+            symbFunc.putAtributo("tipoRetorno", tipoRetorno);
             match(";");
+
+            //Inserto en TS entrada para funcion
+            top.put(symbFunc.getAtributo("nombre"), symbFunc);
+
             Env save = top;
             top = new Env(top);
+
+            //Insertar en TS cada var (parametro)
+            for (Symbol temp : params) {
+                top.put(temp.getAtributo("nombre"), temp);
+            }
+
             System.out.println("{");
             bloque();
             System.out.println("}");
@@ -181,27 +237,43 @@ public class AnalizadorSintactico {
         }
     }
 
-    void parametros_formales() throws IOException{
+    ArrayList<Symbol> parametros_formales() throws IOException{
+        ArrayList<Symbol> params = new ArrayList<Symbol>();
         if(lookahead.getValor().equals("(")){
             match("(");
-            seccion_parametros_formales();
+            params = seccion_parametros_formales();
             while(true){
                 if(lookahead.getValor().equals(";")){
                     match(";");
-                    seccion_parametros_formales();
+                    params.addAll(seccion_parametros_formales());
                     continue; //todo continue
                 }
                 break; //break
             }
             match(")");
+
+
         }
+        return params;
     }
 
-    void seccion_parametros_formales() throws IOException{
-        lista_identificadores();
+    ArrayList<Symbol> seccion_parametros_formales() throws IOException{
+        ArrayList<String> ids = lista_identificadores();
+        String tipoDato;
         if(lookahead.getValor().equals(":")){
             match(":");
-            tipo();
+            tipoDato = tipo();
+            ArrayList<Symbol> params = new ArrayList<Symbol>();
+
+            for(int i=0; i<ids.size(); i++){
+                Symbol symb = new Symbol();
+                symb.putAtributo("tipo", "var");
+                symb.putAtributo("nombre", ids.get(i));
+                symb.putAtributo("tipoDato", tipoDato);
+                params.add(symb);
+            }
+
+            return params;
         }else{
             throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: ':' expected");
         }

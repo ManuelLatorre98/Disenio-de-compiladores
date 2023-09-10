@@ -9,7 +9,13 @@ var
 begin
     i:= 2
 end;
-begin
 
+function func(a, b:integer; c, d:boolean): integer;
+var f: boolean;
+begin
+    f:=true
+end;
+
+begin
   a:=2
 end.
