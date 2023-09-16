@@ -479,9 +479,14 @@ public class AnalizadorSintactico {
     void factor() throws IOException{
         switch(lookahead.getValor()){
             case "identificador":
-                match("identificador");
-                llamada_funcion();
-                break;
+
+                if(top.get(lookahead.getLexema()) != null) { //todo: chequear tipo además de nombre
+                    match("identificador");
+                    llamada_funcion();
+                    break;
+                }else{
+                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: var not declared - "+lookahead.getLexema());
+                }
             case "numero": match("numero"); break;
             case "(":
                 match("(");
