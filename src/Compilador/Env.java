@@ -23,13 +23,10 @@ public class Env {
         return null;
     }
 
-    public boolean colisionTipos(Symbol symb){
+    public boolean colision(Symbol symb){
         boolean resultado = false;
         if(this.table.containsKey(symb.getAtributo("nombre"))){
-            Symbol colision = (Symbol)this.table.get((symb.getAtributo("nombre"))); 
-            if(symb.getAtributo("tipo").equals(colision.getAtributo("tipo"))){
-                resultado = true;
-            }
+            resultado = true;
         }
         return resultado;
     }
