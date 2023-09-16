@@ -17,8 +17,8 @@ public class AnalizadorSintactico {
         }catch(Exception e){
             System.err.println("DEBE INGRESAR POR PARAMETRO LA RUTA DEL ARCHIVO DE TEXTO");
         }
-
     }
+
     public void analizar() throws IOException{
         lookahead = automata.pedirSiguienteToken();
         if(lookahead==null){
@@ -230,7 +230,7 @@ public class AnalizadorSintactico {
 
             match(":");
             String tipoRetorno = tipo();
-            symbFunc.putAtributo("tipoRetorno", tipoRetorno);
+            symbFunc.putAtributo("tipoDato", tipoRetorno);
             match(";");
 
             if(!top.colision(symbFunc)){
