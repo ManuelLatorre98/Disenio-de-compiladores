@@ -413,7 +413,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    void expresion() throws IOException{
+    String expresion() throws IOException{
         expresion_simple();
         if(lookahead.getValor().equals("=") || lookahead.getValor().equals("<") || lookahead.getValor().equals(">")){
             relacion();
@@ -460,45 +460,72 @@ public class AnalizadorSintactico {
         }
     }
 
-    void termino() throws IOException{
-        factor();
+    String termino() throws IOException{
+        String tipo="", tipoFactor1, tipoFactor2, opEsperada="";
+        tipoFactor1 = factor();
         while(true){
             if(lookahead.getValor().equals("*") || lookahead.getValor().equals("div") || lookahead.getValor().equals("and")){
                 switch (lookahead.getValor()){
-                    case "*": match("*"); break;
-                    case "div": match("div"); break;
-                    case "and": match("and"); break;
+                    case "*":
+                        match("*");
+                        opEsperada="integer";
+                        break;
+                    case "div":
+                        match("div");
+                        opEsperada="integer";
+                        break;
+                    case "and":
+                        match("and");
+                        opEsperada="boolean";
+                        break;
                 }
-                factor();
+                tipoFactor2 = factor();
+
+                if(!tipoFactor1.equals(tipoFactor2) || !tipoFactor1.equals(opEsperada)){
+                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
+                }
                 continue;
             }
             break;
         }
+        return tipo;
     }
 
-    void factor() throws IOException{
+    String factor() throws IOException{
+        String tipo="";
         switch(lookahead.getValor()){
             case "identificador":
-
                 if(top.get(lookahead.getLexema()) != null) { //todo: chequear tipo además de nombre
+                    String id = lookahead.getLexema();
+                    tipo = top.get(id).getAtributo("tipoDato");
                     match("identificador");
+                    //todo: chequeos para funcion
                     llamada_funcion();
                     break;
                 }else{
                     throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: var not declared - "+lookahead.getLexema());
                 }
-            case "numero": match("numero"); break;
+            case "numero":
+                match("numero");
+                tipo = "integer";
+                break;
             case "(":
                 match("(");
-                expresion();
+                tipo = expresion();
                 match(")");
                 break;
-            case "not": match("not"); factor(); break;
-            case "true": match("true"); break;
-            case "false": match("false"); break;
+            case "not":
+                match("not");
+                if(!factor().equals("boolean")){
+                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch - expected boolean");
+                }
+                break;
+            case "true": match("true"); tipo="boolean"; break;
+            case "false": match("false"); tipo="boolean"; break;
             default:
                 throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'identificador/numero/(/not/true/false' expected");
         }
+        return tipo;
     }
 
     void llamada_funcion() throws IOException{
