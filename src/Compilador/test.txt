@@ -3,7 +3,7 @@ var
   a, b: integer;
   c, d: boolean;
 
-procedure b;
+procedure y;
 var
     i: integer;
 begin

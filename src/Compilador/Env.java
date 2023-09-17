@@ -16,6 +16,7 @@ public class Env {
     }
 
     public Symbol get(String s) {
+        //todo: check NO USAR GET en declaraciones
         for (Env e = this; e != null; e = e.prev) {
             Symbol found = (Symbol) (e.table.get(s));
             if (found != null) return found;
@@ -23,9 +24,9 @@ public class Env {
         return null;
     }
 
-    public boolean colision(Symbol symb){
+    public boolean colision(String id){
         boolean resultado = false;
-        if(this.table.containsKey(symb.getAtributo("nombre"))){
+        if(this.table.containsKey(id)){
             resultado = true;
         }
         return resultado;
