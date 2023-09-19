@@ -30,8 +30,12 @@ public class Automata {
             "while",
             "do",
             "or",
+            "OR",
             "and",
-            "not"
+            "AND",
+            "not",
+            "true",
+            "false"
     };
 
     public Automata(String path, Cabeza cab) throws Exception {

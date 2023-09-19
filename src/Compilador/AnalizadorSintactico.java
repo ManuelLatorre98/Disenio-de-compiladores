@@ -40,9 +40,11 @@ public class AnalizadorSintactico {
     void programa() throws IOException{
         if(lookahead.getValor().equals("program")){
             match("program");
+            String nombrePrograma = lookahead.getLexema();//obtengo el nombre del programa
             match("identificador");
             match(";");
             this.top= new Env(null); //todo creamos el env inicial
+            inicializarTS(nombrePrograma);
             System.out.println("{");
             bloque();
             match(".");
@@ -355,7 +357,7 @@ public class AnalizadorSintactico {
         }
         if(lookahead.getValor().equals(":=")) {
             tipo = asignacion();
-            System.out.println("TIPO ASIGNACION DERECHA: " + tipo);
+            //System.out.println("TIPO ASIGNACION DERECHA: " + tipo);
             if(!symbId.getAtributo("tipoDato").equals(tipo)){ //todo: chequeo de null va afuera del if
                 throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
             }
@@ -476,7 +478,7 @@ public class AnalizadorSintactico {
             throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
         }
         while(true){
-            if(lookahead.getValor().equals("+") || lookahead.getValor().equals("-") || lookahead.getValor().equals("or")){
+            if(lookahead.getValor().equals("+") || lookahead.getValor().equals("-") || lookahead.getValor().equals("or") ){
                 switch(lookahead.getValor()){
                     case "+": match("+"); tipo = "integer"; break;
                     case "-": match("-"); tipo = "integer"; break;
@@ -490,7 +492,7 @@ public class AnalizadorSintactico {
             }
             break;
         }
-        return tipo;
+        return tipoTermino1;
     }
 
     void relacion() throws IOException{
@@ -540,7 +542,7 @@ public class AnalizadorSintactico {
             }
             break;
         }
-        return tipo;
+        return tipoFactor1;
     }
 
     String factor() throws IOException{
@@ -548,6 +550,7 @@ public class AnalizadorSintactico {
         switch(lookahead.getValor()){
             case "identificador":
                 String id = lookahead.getLexema();
+                System.out.println("FLAG:: "+id);
                 if(top.get(id) != null) {
                     Symbol symbId = top.get(id);
                     tipo = symbId.getAtributo("tipoDato");
@@ -600,5 +603,20 @@ public class AnalizadorSintactico {
         }
     }
 
+    public void inicializarTS(String nombrePrograma){
+        Symbol writeSymb = new Symbol();
+        writeSymb.putAtributo("nombre", "write");
+        writeSymb.putAtributo("cantidadParametros", "0"); //todo verificar los tipos del parametro del write, puede ser cualqueira. caso especial?
+        writeSymb.putAtributo("tipo", "procedure");
+        Symbol readSymb = new Symbol();
+        readSymb.putAtributo("nombre", "read");
+        readSymb.putAtributo("cantidadParametros", "0");
+        readSymb.putAtributo("tipo", "procedure");
+        top.put("write", writeSymb);
+        top.put("read", readSymb);
+        Symbol nombreProg = new Symbol();
+        nombreProg.putAtributo("nombre", nombrePrograma);
+        top.put(nombrePrograma, nombreProg);
+    }
 
 }
