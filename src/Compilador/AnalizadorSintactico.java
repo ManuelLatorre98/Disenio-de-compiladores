@@ -45,11 +45,11 @@ public class AnalizadorSintactico {
             match(";");
             this.top= new Env(null); //todo creamos el env inicial
             inicializarTS(nombrePrograma);
-            System.out.println("{");
+            //System.out.println("{");
             bloque();
             match(".");
-            System.out.println("}");
-            System.out.println("The program is syntactically correct!");
+            //System.out.println("}");
+            System.out.println("The program is syntactically and semantically correct!");
         }else{
             throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'program' expected");
         }
@@ -94,7 +94,7 @@ public class AnalizadorSintactico {
                 symb.putAtributo("tipo","var");
                 symb.putAtributo("tipoDato", lexemaTipoDato);
                 symb.putAtributo("nombre", ids.get(i)); //todo nombre seria atributo o no?
-                System.out.println(ids.get(i)+": "+ lexemaTipoDato+";");
+                //System.out.println(ids.get(i)+": "+ lexemaTipoDato+";");
                 if(!top.colision(symb.getAtributo("nombre"))){
                     top.put(ids.get(i), symb);//Creacion de la entrada en la TS
                 }else{
@@ -162,12 +162,12 @@ public class AnalizadorSintactico {
             params=parametros_formales();
             symbProc.putAtributo("cantidadParametros", Integer.toString(params.size()));
 
-            System.out.println(symbProc.getAtributo("nombre")+"(");
+            //System.out.println(symbProc.getAtributo("nombre")+"(");
 
             //Insertar info de tipos de parametros
             for (int i = 0; i < params.size(); i++) {
                 symbProc.putAtributo("arg"+i, params.get(i).getAtributo("tipoDato")); //todo: si se necesita mas info sobre arg, crear symb?
-                System.out.println("arg"+i + ": " + symbProc.getAtributo("arg"+i));
+                //System.out.println("arg"+i + ": " + symbProc.getAtributo("arg"+i));
             }
 
             if(!top.colision(symbProc.getAtributo("nombre"))){//si no hay colision de tipos en la TS
@@ -178,7 +178,7 @@ public class AnalizadorSintactico {
             }
             
 
-            System.out.println(")");
+            //System.out.println(")");
 
             match(";");
 
@@ -195,9 +195,9 @@ public class AnalizadorSintactico {
                 
             }
 
-            System.out.println("{");
+            //System.out.println("{");
             bloque();
-            System.out.println("}");
+            //System.out.println("}");
 
             top= save;
         }else{
@@ -220,15 +220,15 @@ public class AnalizadorSintactico {
 
             symbFunc.putAtributo("cantidadParametros", Integer.toString(params.size()));
 
-            System.out.println(symbFunc.getAtributo("nombre")+"(");
+            //System.out.println(symbFunc.getAtributo("nombre")+"(");
 
             //Insertar info de tipos de parametros
             for (int i = 0; i < params.size(); i++) {
                 symbFunc.putAtributo("arg"+i, params.get(i).getAtributo("tipoDato")); //todo: si se necesita mas info sobre arg, crear symb?
-                System.out.println("arg"+i + ": " + symbFunc.getAtributo("arg"+i));
+                //System.out.println("arg"+i + ": " + symbFunc.getAtributo("arg"+i));
             }
 
-            System.out.println(")");
+            //System.out.println(")");
 
             match(":");
             String tipoRetorno = tipo();
@@ -253,9 +253,9 @@ public class AnalizadorSintactico {
                 }
             }
 
-            System.out.println("{");
+            //System.out.println("{");
             bloque();
-            System.out.println("}");
+            //System.out.println("}");
             top= save;
         }else{
             throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'function' expected");
@@ -550,7 +550,7 @@ public class AnalizadorSintactico {
         switch(lookahead.getValor()){
             case "identificador":
                 String id = lookahead.getLexema();
-                System.out.println("FLAG:: "+id);
+                //System.out.println("FLAG:: "+id);
                 if(top.get(id) != null) {
                     Symbol symbId = top.get(id);
                     tipo = symbId.getAtributo("tipoDato");

@@ -30,9 +30,7 @@ public class Automata {
             "while",
             "do",
             "or",
-            "OR",
             "and",
-            "AND",
             "not",
             "true",
             "false"
@@ -393,12 +391,13 @@ public class Automata {
                 case 1:
                     if (lexema.matches("^[a-zA-Z_]+$")) {// cualquier letra digito o guionbajo
                         exito = true;
-                        if (palabrasReservadas.containsKey(lexema)) {
-                            token.setNombre(lexema);
-                            token.setValor(lexema);
+                        String lowerCaseLexema = lexema.toLowerCase();
+                        if (palabrasReservadas.containsKey(lowerCaseLexema)) {
+                            token.setNombre(lowerCaseLexema);
+                            token.setValor(lowerCaseLexema);
                         } else { //todo borrar si funciona
                             token.setValor("identificador");
-                            token.setLexema(lexema);
+                            token.setLexema(lowerCaseLexema);
                         }
                         // tokenList.add(token);
                         returnToken = token;
