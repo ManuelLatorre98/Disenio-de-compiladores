@@ -66,7 +66,7 @@ public class Automata {
             if (get_parentesis()) {tokenEncontrado = true; continue;}
             if (get_punto())break; error = true;}// no fue reconocido
             if (error) {
-                throw new LexicalException("Lexical Exception ["+cabeza.getLine()+","+cabeza.getCabeza()+"]: Caracter no perteneciente al alfabeto del lenguaje");
+                new Error("Lexical Exception ["+cabeza.getLine()+","+cabeza.getCabeza()+"]: Caracter no perteneciente al alfabeto del lenguaje");
             }
         return returnToken;
     }

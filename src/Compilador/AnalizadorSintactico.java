@@ -1,7 +1,6 @@
 package Compilador;
 
 import java.io.IOException;
-import java.sql.Array;
 import java.util.ArrayList;
 
 public class AnalizadorSintactico {
@@ -22,17 +21,17 @@ public class AnalizadorSintactico {
     public void analizar() throws IOException{
         lookahead = automata.pedirSiguienteToken();
         if(lookahead==null){
-            throw new SyntaxException("Programa vacio");
+            new Error("Programa vacio");
         }
         programa();
     }
 
     private void match(String string) throws IOException{
         if(lookahead==null){
-            throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: null");
+            new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: null");
         }
         if(!lookahead.getValor().equals(string)){
-            throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: '"+string+"' expected. Received '"+lookahead.getValor()+"'");
+            new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: '"+string+"' expected. Received '"+lookahead.getValor()+"'");
         }
         lookahead = automata.pedirSiguienteToken();
     }
@@ -51,7 +50,7 @@ public class AnalizadorSintactico {
             //System.out.println("}");
             System.out.println("The program is syntactically and semantically correct!");
         }else{
-            throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'program' expected");
+            new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'program' expected");
         }
     }
 
@@ -98,12 +97,12 @@ public class AnalizadorSintactico {
                 if(!top.colision(symb.getAtributo("nombre"))){
                     top.put(ids.get(i), symb);//Creacion de la entrada en la TS
                 }else{
-                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated names: "+ids.get(i));
+                    new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated names: "+ids.get(i));
                 }
                 
             }
         }else{
-            throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: ':' expected");
+            new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: ':' expected");
         }
     }
 
@@ -122,7 +121,7 @@ public class AnalizadorSintactico {
                 break;
             }
         }else {
-            throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'identificador' expected");
+            new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'identificador' expected");
         }
         return ids;
     }
@@ -132,7 +131,7 @@ public class AnalizadorSintactico {
         switch(lookahead.getValor()){//todo borramos match(";")
             case "integer" : match("integer"); break;
             case "boolean" : match("boolean"); break;
-            default: throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'integer/boolean' expected");
+            default: new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'integer/boolean' expected");
         }
         return nombre;
     }
@@ -174,7 +173,7 @@ public class AnalizadorSintactico {
                 //insetar simbolo de procedimiento en la TS
                 top.put(symbProc.getAtributo("nombre"), symbProc);
             }else{
-                throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated names: "+symbProc.getAtributo("nombre"));
+                new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated names: "+symbProc.getAtributo("nombre"));
             }
             
 
@@ -190,7 +189,7 @@ public class AnalizadorSintactico {
                 if(!top.colision(temp.getAtributo("nombre"))){
                     top.put(temp.getAtributo("nombre"), temp);    
                 }else{
-                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated var names: "+temp.getAtributo("nombre"));
+                    new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated var names: "+temp.getAtributo("nombre"));
                 }
                 
             }
@@ -201,7 +200,7 @@ public class AnalizadorSintactico {
 
             top= save;
         }else{
-            throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'procedure' expected");
+            new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'procedure' expected");
         }
     }
 
@@ -239,7 +238,7 @@ public class AnalizadorSintactico {
                 //Inserto en TS entrada para funcion
                 top.put(symbFunc.getAtributo("nombre"), symbFunc);
             }else{
-                throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated function names: "+symbFunc.getAtributo("nombre"));
+                new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated function names: "+symbFunc.getAtributo("nombre"));
             }
             Env save = top;
             top = new Env(top);
@@ -249,7 +248,7 @@ public class AnalizadorSintactico {
                 if(!top.colision(temp.getAtributo("nombre"))){
                     top.put(temp.getAtributo("nombre"), temp);
                 }else{
-                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated var names: "+temp.getAtributo("nombre"));
+                    new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated var names: "+temp.getAtributo("nombre"));
                 }
             }
 
@@ -258,7 +257,7 @@ public class AnalizadorSintactico {
             //System.out.println("}");
             top= save;
         }else{
-            throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'function' expected");
+            new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'function' expected");
         }
     }
 
@@ -283,12 +282,12 @@ public class AnalizadorSintactico {
     }
 
     ArrayList<Symbol> seccion_parametros_formales() throws IOException{
+        ArrayList<Symbol> params = new ArrayList<Symbol>();
         ArrayList<String> ids = lista_identificadores();
         String tipoDato;
         if(lookahead.getValor().equals(":")){
             match(":");
             tipoDato = tipo();
-            ArrayList<Symbol> params = new ArrayList<Symbol>();
 
             for(int i=0; i<ids.size(); i++){
                 Symbol symb = new Symbol();
@@ -298,10 +297,10 @@ public class AnalizadorSintactico {
                 params.add(symb);
             }
 
-            return params;
         }else{
-            throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: ':' expected");
+            new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: ':' expected");
         }
+        return params;
     }
 
     //SENTENCIAS
@@ -324,7 +323,7 @@ public class AnalizadorSintactico {
             //System.out.println("}");
             //top= save;
         }else{
-            throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'begin' expected");
+            new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'begin' expected");
         }
     }
 
@@ -345,7 +344,7 @@ public class AnalizadorSintactico {
                 sentencia_repetitiva();
                 break;
             default:
-                throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'identificador/begin/if/while' expected");
+                new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'identificador/begin/if/while' expected");
         }
     }
 
@@ -353,13 +352,13 @@ public class AnalizadorSintactico {
         String tipo="";
         Symbol symbId = top.get(id.getLexema());
         if(symbId == null){
-            throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: not declared");
+            new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: not declared");
         }
         if(lookahead.getValor().equals(":=")) {
             tipo = asignacion();
             //System.out.println("TIPO ASIGNACION DERECHA: " + tipo);
-            if(!symbId.getAtributo("tipoDato").equals(tipo)){ //todo: chequeo de null va afuera del if
-                throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
+            if(!symbId.getAtributo("tipoDato").equals(tipo)){
+                new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
             }
         }else{
             llamada_procedimiento(id.getLexema());
@@ -373,28 +372,34 @@ public class AnalizadorSintactico {
             match(":=");
             tipoExp = expresion();
         }else{
-            throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: ':=' expected");
+            new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: ':=' expected");
         }
         return tipoExp;
     }
 
     void llamada_procedimiento(String id) throws IOException{
         ArrayList<String> tipos;
+        if(!top.get(id).getAtributo("tipo").equals("procedure")){ //Si NO es procedure...
+            new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: procedure expected");
+        }
+        String idCantParametros = top.get(id).getAtributo("cantidadParametros");
         if(lookahead.getValor().equals("(")){
             match("(");
-            if(!lookahead.getValor().equals(")")){
-                tipos = lista_expresiones();
-                int cantParametros = tipos.size();
-                if(!top.get(id).getAtributo("cantidadParametros").equals(Integer.toString(cantParametros))){
-                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg count mismatch");
-                }
+            tipos = lista_expresiones(); //todo: que devuelva tupla [tipoDato, tipoOD]
+            int cantParametros = tipos.size();
+            if(!idCantParametros.equals(Integer.toString(cantParametros))){
+                new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg count mismatch");
+            }
+            if(!id.equals("read") && !id.equals("write")){ //Ignoro chequeo de tipos si es read o write
                 for (int i = 0; i < cantParametros; i++) {
-                    if(!top.get(id).getAtributo("arg"+i).equals(tipos.get(i))){
-                        throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg type mismatch");
+                    if (!top.get(id).getAtributo("arg" + i).equals(tipos.get(i))) {
+                        new Error("Semantic Exception [" + cabeza.getLine() + "," + (cabeza.getCabeza() - 1) + "]: arg type mismatch");
                     }
                 }
             }
             match(")");
+        } else if (!idCantParametros.equals("0")) {
+            new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg count mismatch");
         }
     }
 
@@ -404,7 +409,7 @@ public class AnalizadorSintactico {
             match("if");
             tipoExp = expresion();
             if(!tipoExp.equals("boolean")){
-                throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
+                new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
             }
             match("then");
             sentencia();
@@ -413,7 +418,7 @@ public class AnalizadorSintactico {
                 sentencia();
             }
         }else{
-            throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'if' expected");
+            new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'if' expected");
         }
     }
 
@@ -423,12 +428,12 @@ public class AnalizadorSintactico {
             match("while");
             tipoExp = expresion();
             if(!tipoExp.equals("boolean")){
-                throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
+                new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
             }
             match("do");
             sentencia();
         }else{
-            throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'while' expected");
+            new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'while' expected");
         }
     }
 
@@ -460,7 +465,7 @@ public class AnalizadorSintactico {
             relacion();
             tipoExp2 = expresion_simple();
             if((!tipoExp1.equals(tipoExp2)) || (tipo.equals("integer") && !tipoExp1.equals("integer"))){ //Si los tipos de las exp son DISTINTOS, o hay mismatch con el tipo esperado INT
-                throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
+                new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
             }
         }
         return tipoExp1;
@@ -475,7 +480,7 @@ public class AnalizadorSintactico {
         }
         tipoTermino1 = termino();
         if(tipo.equals("integer") && !tipoTermino1.equals("integer")){
-            throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
+            new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
         }
         while(true){
             if(lookahead.getValor().equals("+") || lookahead.getValor().equals("-") || lookahead.getValor().equals("or") ){
@@ -486,7 +491,7 @@ public class AnalizadorSintactico {
                 }
                 tipoTermino2 = termino();
                 if(!tipoTermino1.equals(tipoTermino2) || !tipoTermino1.equals(tipo)){
-                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
+                    new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
                 }
                 continue;
             }
@@ -510,7 +515,7 @@ public class AnalizadorSintactico {
                 if(lookahead.getValor().equals("=")) match("=");
                 break;
             default:
-                throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: '=/</>' expected");
+                new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: '=/</>' expected");
         }
     }
 
@@ -536,7 +541,7 @@ public class AnalizadorSintactico {
                 tipoFactor2 = factor();
 
                 if(!tipoFactor1.equals(tipoFactor2) || !tipoFactor1.equals(tipo)){
-                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
+                    new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
                 }
                 continue;
             }
@@ -555,10 +560,14 @@ public class AnalizadorSintactico {
                     Symbol symbId = top.get(id);
                     tipo = symbId.getAtributo("tipoDato");
                     match("identificador");
-                    llamada_funcion(id);
+                    if(top.get(id).getAtributo("tipo").equals("function")){
+                        llamada_funcion(id);
+                    }else if(top.get(id).getAtributo("tipo").equals("procedure")){
+                        new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: function expected");
+                    }
                     break;
                 }else{
-                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: var not declared - "+lookahead.getLexema());
+                    new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: var not declared - "+lookahead.getLexema());
                 }
             case "numero":
                 match("numero");
@@ -572,48 +581,56 @@ public class AnalizadorSintactico {
             case "not":
                 match("not");
                 if(!factor().equals("boolean")){
-                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch - expected boolean");
+                    new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch - expected boolean");
                 }
                 break;
             case "true": match("true"); tipo="boolean"; break;
             case "false": match("false"); tipo="boolean"; break;
             default:
-                throw new SyntaxException("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'identificador/numero/(/not/true/false' expected");
+                new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'identificador/numero/(/not/true/false' expected");
         }
         return tipo;
     }
 
     void llamada_funcion(String id) throws IOException{
         ArrayList<String> tipos;
+        /*if(!top.get(id).getAtributo("tipo").equals("function")){
+            new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: function expected");
+        }*/
+
+        String idCantParametros = top.get(id).getAtributo("cantidadParametros");
+
         if(lookahead.getValor().equals("(")){
             match("(");
-            if(!lookahead.getValor().equals(")")){
-                tipos = lista_expresiones();
-                int cantParametros = tipos.size();
-                if(!top.get(id).getAtributo("cantidadParametros").equals(Integer.toString(cantParametros))){
-                    throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg count mismatch");
-                }
-                for (int i = 0; i < cantParametros; i++) {
-                    if(!top.get(id).getAtributo("arg"+i).equals(tipos.get(i))){
-                        throw new SemanticException("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg type mismatch");
-                    }
+            tipos = lista_expresiones();
+            int cantParametros = tipos.size();
+            if(!idCantParametros.equals(Integer.toString(cantParametros))){
+                new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg count mismatch");
+            }
+            for (int i = 0; i < cantParametros; i++) {
+                if(!top.get(id).getAtributo("arg"+i).equals(tipos.get(i))){
+                    new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg type mismatch");
                 }
             }
             match(")");
+        }else if(top.get(id).getAtributo("tipo").equals("function") && !idCantParametros.equals("0")){
+            new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg count mismatch");
         }
     }
 
     public void inicializarTS(String nombrePrograma){
         Symbol writeSymb = new Symbol();
         writeSymb.putAtributo("nombre", "write");
-        writeSymb.putAtributo("cantidadParametros", "0"); //todo verificar los tipos del parametro del write, puede ser cualqueira. caso especial?
+        writeSymb.putAtributo("cantidadParametros", "1"); //todo verificar los tipos del parametro del write, puede ser cualqueira. caso especial?
         writeSymb.putAtributo("tipo", "procedure");
+
         Symbol readSymb = new Symbol();
         readSymb.putAtributo("nombre", "read");
-        readSymb.putAtributo("cantidadParametros", "0");
+        readSymb.putAtributo("cantidadParametros", "1");
         readSymb.putAtributo("tipo", "procedure");
         top.put("write", writeSymb);
         top.put("read", readSymb);
+
         Symbol nombreProg = new Symbol();
         nombreProg.putAtributo("nombre", nombrePrograma);
         top.put(nombrePrograma, nombreProg);
