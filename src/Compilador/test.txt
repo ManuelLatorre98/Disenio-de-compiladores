@@ -18,5 +18,5 @@ end;
 
 begin
   a:=2;
-  read(func(a, b, c, d))
+  a:= func(a, b, c, d)
 end.

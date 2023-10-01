@@ -210,8 +210,10 @@ public class AnalizadorSintactico {
         if(lookahead.getValor().equals("function")){
             match("function");
 
+            String id = lookahead.getLexema();
+
             symbFunc.putAtributo("tipo", "function");
-            symbFunc.putAtributo("nombre", lookahead.getLexema());
+            symbFunc.putAtributo("nombre", id);
 
             match("identificador");
 
@@ -234,14 +236,22 @@ public class AnalizadorSintactico {
             symbFunc.putAtributo("tipoDato", tipoRetorno);
             match(";");
 
-            if(!top.colision(symbFunc.getAtributo("nombre"))){
+            if(!top.colision(id)){
                 //Inserto en TS entrada para funcion
-                top.put(symbFunc.getAtributo("nombre"), symbFunc);
+                top.put(id, symbFunc);
             }else{
                 new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated function names: "+symbFunc.getAtributo("nombre"));
             }
             Env save = top;
             top = new Env(top);
+
+            Symbol symbReturn = new Symbol();
+            symbReturn.putAtributo("nombre", id);
+            symbReturn.putAtributo("tipo", "var");
+            symbReturn.putAtributo("tipoDato", tipoRetorno);
+
+            //Symbol para "var" que representa el return (mismo nombre que función)
+            top.put(id, symbReturn);
 
             //Insertar en TS cada var (parametro)
             for (Symbol temp : params) {
@@ -370,7 +380,7 @@ public class AnalizadorSintactico {
         String tipoExp="";
         if(lookahead.getValor().equals(":=")){
             match(":=");
-            tipoExp = expresion();
+            tipoExp = expresion()[0];
         }else{
             new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: ':=' expected");
         }
@@ -378,7 +388,7 @@ public class AnalizadorSintactico {
     }
 
     void llamada_procedimiento(String id) throws IOException{
-        ArrayList<String> tipos;
+        ArrayList<String[]> tipos;
         if(!top.get(id).getAtributo("tipo").equals("procedure")){ //Si NO es procedure...
             new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: procedure expected");
         }
@@ -392,10 +402,12 @@ public class AnalizadorSintactico {
             }
             if(!id.equals("read") && !id.equals("write")){ //Ignoro chequeo de tipos si es read o write
                 for (int i = 0; i < cantParametros; i++) {
-                    if (!top.get(id).getAtributo("arg" + i).equals(tipos.get(i))) {
+                    if (!top.get(id).getAtributo("arg" + i).equals(tipos.get(i)[0])) {
                         new Error("Semantic Exception [" + cabeza.getLine() + "," + (cabeza.getCabeza() - 1) + "]: arg type mismatch");
                     }
                 }
+            }else if(id.equals("read") && !tipos.get(0)[1].equals("var")){ //Si es read y el parámetro NO es variable
+                new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: read expected variable as parameter");
             }
             match(")");
         } else if (!idCantParametros.equals("0")) {
@@ -407,7 +419,7 @@ public class AnalizadorSintactico {
         String tipoExp;
         if(lookahead.getValor().equals("if")){
             match("if");
-            tipoExp = expresion();
+            tipoExp = expresion()[0];
             if(!tipoExp.equals("boolean")){
                 new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
             }
@@ -426,7 +438,7 @@ public class AnalizadorSintactico {
         String tipoExp;
         if(lookahead.getValor().equals("while")){
             match("while");
-            tipoExp = expresion();
+            tipoExp = expresion()[0];
             if(!tipoExp.equals("boolean")){
                 new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
             }
@@ -438,9 +450,9 @@ public class AnalizadorSintactico {
     }
 
     //EXPRESIONES
-    ArrayList<String> lista_expresiones() throws IOException{
-        ArrayList<String> tipos = new ArrayList<String>();
-        String tipoExp="";
+    ArrayList<String[]> lista_expresiones() throws IOException{
+        ArrayList<String[]> tipos = new ArrayList<>();
+        String[] tipoExp;
         tipoExp = expresion();
         tipos.add(tipoExp);
         while(true){
@@ -455,42 +467,46 @@ public class AnalizadorSintactico {
         return tipos;
     }
 
-    String expresion() throws IOException{
-        String tipo="", tipoExp1="", tipoExp2="";
+    String[] expresion() throws IOException{
+        String[] tipoExp1, tipoExp2;
+        String tipo="";
         tipoExp1 = expresion_simple();
         if(lookahead.getValor().equals("=") || lookahead.getValor().equals("<") || lookahead.getValor().equals(">")){
+            tipoExp1[1] = ""; //Seteo a "" ya que expresion NO es una única variable (para chequeo en READ).
             if(!lookahead.getValor().equals("=")){ //Si viene = entonces puede ser bool o int. En otro caso, solo puede ser int
                 tipo="integer";
             }
             relacion();
             tipoExp2 = expresion_simple();
-            if((!tipoExp1.equals(tipoExp2)) || (tipo.equals("integer") && !tipoExp1.equals("integer"))){ //Si los tipos de las exp son DISTINTOS, o hay mismatch con el tipo esperado INT
+            if((!tipoExp1[0].equals(tipoExp2[0])) || (tipo.equals("integer") && !tipoExp1[0].equals("integer"))){ //Si los tipos de las exp son DISTINTOS, o hay mismatch con el tipo esperado INT
                 new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
             }
         }
         return tipoExp1;
     }
 
-    String expresion_simple() throws IOException{
-        String tipo="", tipoTermino1, tipoTermino2;
+    String[] expresion_simple() throws IOException{
+        String[] tipoTermino1, tipoTermino2;
+        String tipo="";
         if(lookahead.getValor().equals("+") || lookahead.getValor().equals("-")){
             if(lookahead.getValor().equals("+")) match("+");
             if(lookahead.getValor().equals("-")) match("-");
             tipo="integer";
         }
         tipoTermino1 = termino();
-        if(tipo.equals("integer") && !tipoTermino1.equals("integer")){
+        if(tipo.equals("integer") && !tipoTermino1[0].equals("integer")){
             new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
         }
         while(true){
             if(lookahead.getValor().equals("+") || lookahead.getValor().equals("-") || lookahead.getValor().equals("or") ){
+                tipoTermino1[1] = ""; //Seteo a "" ya que expresion_simple NO es una única variable (para chequeo en READ).
                 switch(lookahead.getValor()){
                     case "+": match("+"); tipo = "integer"; break;
                     case "-": match("-"); tipo = "integer"; break;
                     case "or": match("or"); tipo = "boolean"; break;
                 }
                 tipoTermino2 = termino();
-                if(!tipoTermino1.equals(tipoTermino2) || !tipoTermino1.equals(tipo)){
+                if(!tipoTermino1[0].equals(tipoTermino2[0]) || !tipoTermino1[0].equals(tipo)){
                     new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
                 }
                 continue;
@@ -519,11 +535,13 @@ public class AnalizadorSintactico {
         }
     }
 
-    String termino() throws IOException{
-        String tipoFactor1, tipoFactor2, tipo="";
+    String[] termino() throws IOException{
+        String[] tipoFactor1, tipoFactor2;
+        String tipo="";
         tipoFactor1 = factor();
         while(true){
             if(lookahead.getValor().equals("*") || lookahead.getValor().equals("div") || lookahead.getValor().equals("and")){
+                tipoFactor1[1] = ""; //Seteo a "" ya que término NO es una única variable (para chequeo en READ).
                 switch (lookahead.getValor()){
                     case "*":
                         match("*");
@@ -540,7 +558,7 @@ public class AnalizadorSintactico {
                 }
                 tipoFactor2 = factor();
 
-                if(!tipoFactor1.equals(tipoFactor2) || !tipoFactor1.equals(tipo)){
+                if(!tipoFactor1[0].equals(tipoFactor2[0]) || !tipoFactor1[0].equals(tipo)){
                     new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
                 }
                 continue;
@@ -550,19 +568,22 @@ public class AnalizadorSintactico {
         return tipoFactor1;
     }
 
-    String factor() throws IOException{
-        String tipo="";
+    String[] factor() throws IOException{
+        //String tipo="";
+        String[] tipo = {"", ""};
         switch(lookahead.getValor()){
             case "identificador":
                 String id = lookahead.getLexema();
-                //System.out.println("FLAG:: "+id);
+
                 if(top.get(id) != null) {
                     Symbol symbId = top.get(id);
-                    tipo = symbId.getAtributo("tipoDato");
+                    tipo[0] = symbId.getAtributo("tipoDato");
+                    tipo[1] = symbId.getAtributo("tipo");
+
                     match("identificador");
-                    if(top.get(id).getAtributo("tipo").equals("function")){
+                    if(tipo[1].equals("function")){
                         llamada_funcion(id);
-                    }else if(top.get(id).getAtributo("tipo").equals("procedure")){
+                    }else if(tipo[1].equals("procedure")){
                         new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: function expected");
                     }
                     break;
@@ -571,7 +592,7 @@ public class AnalizadorSintactico {
                 }
             case "numero":
                 match("numero");
-                tipo = "integer";
+                tipo[0] = "integer";
                 break;
             case "(":
                 match("(");
@@ -584,8 +605,8 @@ public class AnalizadorSintactico {
                     new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch - expected boolean");
                 }
                 break;
-            case "true": match("true"); tipo="boolean"; break;
-            case "false": match("false"); tipo="boolean"; break;
+            case "true": match("true"); tipo[0]="boolean"; break;
+            case "false": match("false"); tipo[0]="boolean"; break;
             default:
                 new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'identificador/numero/(/not/true/false' expected");
         }
@@ -593,7 +614,7 @@ public class AnalizadorSintactico {
     }
 
     void llamada_funcion(String id) throws IOException{
-        ArrayList<String> tipos;
+        ArrayList<String[]> tipos;
         /*if(!top.get(id).getAtributo("tipo").equals("function")){
             new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: function expected");
         }*/
@@ -608,7 +629,7 @@ public class AnalizadorSintactico {
                 new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg count mismatch");
             }
             for (int i = 0; i < cantParametros; i++) {
-                if(!top.get(id).getAtributo("arg"+i).equals(tipos.get(i))){
+                if(!top.get(id).getAtributo("arg"+i).equals(tipos.get(i)[0])){
                     new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg type mismatch");
                 }
             }
