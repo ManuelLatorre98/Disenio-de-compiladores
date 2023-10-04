@@ -1,13 +1,13 @@
 program prueba ;{ Archivo Prueba C&I: EJ20C.PAS }
 var
-  a, b: integer;
+  a, b,write: integer;
   c, d: boolean;
 
 function func(a, b:integer; c, d:boolean): integer;
 var f: boolean;
 begin
-    f:=true
-    
+    f:=true;
+    func:=22
 end;
 
 procedure algo(a: integer);

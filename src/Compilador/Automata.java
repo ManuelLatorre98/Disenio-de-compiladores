@@ -33,7 +33,9 @@ public class Automata {
             "and",
             "not",
             "true",
-            "false"
+            "false",
+            "write",
+            "read"
     };
 
     public Automata(String path, Cabeza cab) throws Exception {

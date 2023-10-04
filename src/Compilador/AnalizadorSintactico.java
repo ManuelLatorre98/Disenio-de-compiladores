@@ -268,7 +268,7 @@ public class AnalizadorSintactico {
             //System.out.println("}");
             //verificacion de retorno declarado de la funcion
             if(symbReturn.getAtributo("declarado") == null){
-                new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: undeclared function return");
+                new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: undeclared function return");
             }
 
             top= save;
