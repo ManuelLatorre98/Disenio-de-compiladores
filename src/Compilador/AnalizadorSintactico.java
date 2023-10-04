@@ -247,7 +247,7 @@ public class AnalizadorSintactico {
 
             Symbol symbReturn = new Symbol();
             symbReturn.putAtributo("nombre", id);
-            symbReturn.putAtributo("tipo", "var");
+            symbReturn.putAtributo("tipo", "retorno");
             symbReturn.putAtributo("tipoDato", tipoRetorno);
 
             //Symbol para "var" que representa el return (mismo nombre que función)
@@ -264,7 +264,13 @@ public class AnalizadorSintactico {
 
             //System.out.println("{");
             bloque();
+            
             //System.out.println("}");
+            //verificacion de retorno declarado de la funcion
+            if(symbReturn.getAtributo("declarado") == null){
+                new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: undeclared function return");
+            }
+
             top= save;
         }else{
             new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: 'function' expected");
@@ -363,6 +369,9 @@ public class AnalizadorSintactico {
         Symbol symbId = top.get(id.getLexema());
         if(symbId == null){
             new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: not declared");
+        }
+        if(symbId.getAtributo("tipo").equals("retorno")){//para las funciones; verifica que se haya declarado el "return"
+            symbId.putAtributo("declarado", "True");
         }
         if(lookahead.getValor().equals(":=")) {
             tipo = asignacion();

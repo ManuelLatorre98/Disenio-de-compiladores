@@ -6,8 +6,8 @@ var
 function func(a, b:integer; c, d:boolean): integer;
 var f: boolean;
 begin
-    f:=true;
-    func:=2
+    f:=true
+    
 end;
 
 procedure algo(a: integer);
