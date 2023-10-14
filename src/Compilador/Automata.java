@@ -39,6 +39,7 @@ public class Automata {
     };
 
     public Automata(String path, Cabeza cab) throws Exception {
+        //todo: pq rompe con comments multilinea??
         this.archivo = new LeerArchivo(path);
         this.line = archivo.getLine() + " ";
         this.cabeza = cab;
@@ -491,6 +492,7 @@ public class Automata {
                     if (lexema.matches("^[0-9]+$")) {// cualquier digito
                         exito = true;
                         token.setValor("numero");
+                        token.setLexema(lexema);
                         returnToken = token;
                         //print_lexema_token(lexema, token.getNombre());
                     } else

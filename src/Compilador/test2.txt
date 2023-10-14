@@ -1,0 +1,9 @@
+program prueba ;{ Archivo Prueba C&I: EJ20C.PAS }
+var
+  a, b: integer;
+  c, d: boolean;
+
+begin
+  a:= b*3 + a
+  {a:= func(a, b, c, d)}
+end.

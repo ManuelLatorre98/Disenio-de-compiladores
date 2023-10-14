@@ -1,22 +1,22 @@
-program prueba ;{ Archivo Prueba C&I: EJ20C.PAS }
-var
-  a, b,write: integer;
-  c, d: boolean;
+program ejemplo;
+var k:integer;
 
-function func(a, b:integer; c, d:boolean): integer;
-var f: boolean;
-begin
-    f:=true;
-    func:=22
-end;
+    procedure p(n, g:integer);
+        var h: integer;
+        begin
+            if n<2 then
+                h:= g+n
+            else
+                begin
+                    h:=g;
+                    p(n-1, h);
+                    k:=h;
+                    p(n-2, g)
+                end
+            {write(h)}
+        end;
 
-procedure algo(a: integer);
-var x: integer;
-begin
-    x:=1
-end;
-
-begin
-  a:=2;
-  a:= func(a, b, c, d)
-end.
+    begin
+        k:=0;
+        p(3, k)
+    end.
