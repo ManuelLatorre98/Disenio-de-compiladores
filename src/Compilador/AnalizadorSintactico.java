@@ -64,7 +64,7 @@ public class AnalizadorSintactico {
 
     void bloque() {
         try {
-            seccion_declaracion_variables();
+            int cantVariables = seccion_declaracion_variables();
 
             if(nivelActual == 0) pila.push("DSVS l1");
 
@@ -73,7 +73,7 @@ public class AnalizadorSintactico {
             if(nivelActual == 0) pila.push("l1 NADA");
 
             sentencia_compuesta();
-            //todo: LMEM
+            if(cantVariables>0) pila.push("LMEM " + cantVariables);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -82,7 +82,7 @@ public class AnalizadorSintactico {
     }
 
     //DECLARACIONES
-    void seccion_declaracion_variables() throws IOException{
+    int seccion_declaracion_variables() throws IOException{
         int cantVariables=0;
         if(lookahead.getValor().equals("var")){
             match("var");
@@ -96,7 +96,9 @@ public class AnalizadorSintactico {
                 }
                 break;
             }
+            pila.push("RMEM " + cantVariables);
         }
+        return cantVariables;
     }
 
     int declaracion_variables(int cantVariables) throws IOException{
@@ -119,7 +121,7 @@ public class AnalizadorSintactico {
                     new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: duplicated names: "+ids.get(i));
                 }
             }
-            pila.push("RMEM " + ids.size()); //todo: asumimos 1 byte para boolean e integer??
+            //pila.push("RMEM " + ids.size()); //todo: asumimos 1 byte para boolean e integer??
         }else{
             new Error("Syntax Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: ':' expected");
         }
@@ -180,6 +182,9 @@ public class AnalizadorSintactico {
 
             params=parametros_formales();
             symbProc.putAtributo("cantidadParametros", Integer.toString(params.size()));
+
+            labelIndex++;
+            symbProc.putAtributo("label", Integer.toString(labelIndex));
 
             //System.out.println(symbProc.getAtributo("nombre")+"(");
 
@@ -458,7 +463,7 @@ public class AnalizadorSintactico {
                 new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: read expected variable as parameter");
             }
             match(")");
-            pila.push("LLPR l");
+            pila.push("LLPR l"+top.get(id).getAtributo("label"));
         } else if (!idCantParametros.equals("0")) {
             new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg count mismatch");
         }
