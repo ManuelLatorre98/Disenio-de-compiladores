@@ -398,6 +398,7 @@ public class Automata {
                         if (palabrasReservadas.containsKey(lowerCaseLexema)) {
                             token.setNombre(lowerCaseLexema);
                             token.setValor(lowerCaseLexema);
+                            token.setLexema(lowerCaseLexema);
                         } else { //todo borrar si funciona
                             token.setValor("identificador");
                             token.setLexema(lowerCaseLexema);

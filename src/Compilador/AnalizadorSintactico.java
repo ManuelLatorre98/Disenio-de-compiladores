@@ -101,7 +101,8 @@ public class AnalizadorSintactico {
         return cantVariables;
     }
 
-    int declaracion_variables(int cantVariables) throws IOException{
+    int declaracion_variables(int cantVariablesPiso) throws IOException{
+        int cantVariables = cantVariablesPiso;
         ArrayList<String> ids = lista_identificadores();
         if(lookahead.getValor().equals(":")){
             match(":");
@@ -111,7 +112,7 @@ public class AnalizadorSintactico {
                 symb.putAtributo("tipo","var");
                 symb.putAtributo("tipoDato", lexemaTipoDato);
                 symb.putAtributo("nombre", ids.get(i));
-                symb.putAtributo("posicion", Integer.toString(cantVariables + i));
+                symb.putAtributo("posicion", Integer.toString(cantVariablesPiso + i));
                 symb.putAtributo("nivel", Integer.toString(nivelActual));
                 //System.out.println(ids.get(i)+": "+ lexemaTipoDato+";");
                 cantVariables++;
@@ -226,6 +227,8 @@ public class AnalizadorSintactico {
             bloque();
             //System.out.println("}");
 
+            pila.push("RTPR " + nivelActual + " " + params.size());
+
             top= save;
             nivelActual--;
         }else{
@@ -249,6 +252,11 @@ public class AnalizadorSintactico {
             params = parametros_formales();
 
             symbFunc.putAtributo("cantidadParametros", Integer.toString(params.size()));
+            symbFunc.putAtributo("nivel", Integer.toString(nivelActual+1));
+            symbFunc.putAtributo("posicion", Integer.toString(-(params.size()+3)));
+
+            labelIndex++;
+            symbFunc.putAtributo("label", Integer.toString(labelIndex));
 
             //System.out.println(symbFunc.getAtributo("nombre")+"(");
 
@@ -275,14 +283,17 @@ public class AnalizadorSintactico {
             top = new Env(top);
 
             nivelActual++;
+            pila.push("ENPR " + nivelActual);
 
-            Symbol symbReturn = new Symbol();
+            /*Symbol symbReturn = new Symbol();
             symbReturn.putAtributo("nombre", id);
             symbReturn.putAtributo("tipo", "retorno");
             symbReturn.putAtributo("tipoDato", tipoRetorno);
+            symbReturn.putAtributo("posicion", Integer.toString(-(params.size()+3)));
+            symbReturn.putAtributo("nivel", Integer.toString(nivelActual));
 
             //Symbol para "var" que representa el return (mismo nombre que función)
-            top.put(id, symbReturn);
+            top.put(id, symbReturn);*/
 
             //Insertar en TS cada var (parametro)
             for (Symbol temp : params) {
@@ -298,9 +309,11 @@ public class AnalizadorSintactico {
             
             //System.out.println("}");
             //verificacion de retorno declarado de la funcion
-            if(symbReturn.getAtributo("declarado") == null){
+            if(top.get(id).getAtributo("retornoDeclarado") == null){
                 new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: undeclared function return");
             }
+
+            pila.push("RTPR " + nivelActual + " " + params.size());
 
             top= save;
             nivelActual--;
@@ -384,10 +397,14 @@ public class AnalizadorSintactico {
     }
 
     void sentencia() throws IOException{
-        switch (lookahead.getValor()){
+        Token id;
+        String valor = lookahead.getValor();
+        switch (valor){
+            case "write":
+            case "read":
             case "identificador":
-                Token id = lookahead;
-                match("identificador");
+                id = lookahead;
+                match(valor);
                 temp(id);
                 break;
             case "begin":
@@ -410,13 +427,15 @@ public class AnalizadorSintactico {
         if(symbId == null){
             new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: not declared");
         }
-        if(symbId.getAtributo("tipo").equals("retorno")){//para las funciones; verifica que se haya declarado el "return"
-            symbId.putAtributo("declarado", "True");
-        }
+
         if(lookahead.getValor().equals(":=")) {
             tipo = asignacion();
 
             pila.push("ALVL " + symbId.getAtributo("nivel") + " " + symbId.getAtributo("posicion"));
+
+            if(symbId.getAtributo("tipo").equals("function")){//para las funciones; verifica que se haya declarado el "return"
+                symbId.putAtributo("retornoDeclarado", "True");
+            }
 
             if(!symbId.getAtributo("tipoDato").equals(tipo)){
                 new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: type mismatch");
@@ -448,7 +467,7 @@ public class AnalizadorSintactico {
 
         if(lookahead.getValor().equals("(")){
             match("(");
-            tipos = lista_expresiones(); //todo: que devuelva tupla [tipoDato, tipoOD]
+            tipos = lista_expresiones();
             int cantParametros = tipos.size();
             if(!idCantParametros.equals(Integer.toString(cantParametros))){
                 new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg count mismatch");
@@ -459,11 +478,17 @@ public class AnalizadorSintactico {
                         new Error("Semantic Exception [" + cabeza.getLine() + "," + (cabeza.getCabeza() - 1) + "]: arg type mismatch");
                     }
                 }
-            }else if(id.equals("read") && !tipos.get(0)[1].equals("var")){ //Si es read y el parámetro NO es variable
-                new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: read expected variable as parameter");
+                pila.push("LLPR l"+top.get(id).getAtributo("label")); //LLPR cuando NO es read o write
+            }else{
+                if(id.equals("write")){
+                    pila.push("IMPR"); //Único IMPR porque limitamos write a 1 parámetro
+                }
+
+                if(id.equals("read") && !tipos.get(0)[1].equals("var")){ //Si es read y el parámetro NO es variable
+                    new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: read expected variable as parameter");
+                }
             }
             match(")");
-            pila.push("LLPR l"+top.get(id).getAtributo("label"));
         } else if (!idCantParametros.equals("0")) {
             new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg count mismatch");
         }
@@ -673,7 +698,7 @@ public class AnalizadorSintactico {
 
     String[] factor() throws IOException{
         //String tipo="";
-        String[] tipo = {"", ""};
+        String[] tipo = {"", "", ""};
         switch(lookahead.getValor()){
             case "identificador":
                 String id = lookahead.getLexema();
@@ -682,16 +707,16 @@ public class AnalizadorSintactico {
                     Symbol symbId = top.get(id);
                     tipo[0] = symbId.getAtributo("tipoDato");
                     tipo[1] = symbId.getAtributo("tipo");
+                    tipo[2] = id;
 
                     match("identificador");
-
-                    pila.push("APVL " + top.get(id).getAtributo("nivel") + " " + top.get(id).getAtributo("posicion")); //todo: tema funciones
 
                     if(tipo[1].equals("function")){
                         llamada_funcion(id);
                     }else if(tipo[1].equals("procedure")){
                         new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: function expected");
-                    }
+                    }else pila.push("APVL " + top.get(id).getAtributo("nivel") + " " + top.get(id).getAtributo("posicion")); //Cuando es var
+
                     break;
                 }else{
                     new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: var not declared - "+lookahead.getLexema());
@@ -731,6 +756,8 @@ public class AnalizadorSintactico {
 
         String idCantParametros = top.get(id).getAtributo("cantidadParametros");
 
+        pila.push("RMEM 1"); //Reservo para retorno
+
         if(lookahead.getValor().equals("(")){
             match("(");
             tipos = lista_expresiones();
@@ -744,6 +771,7 @@ public class AnalizadorSintactico {
                 }
             }
             match(")");
+            pila.push("LLPR l"+top.get(id).getAtributo("label"));
         }else if(top.get(id).getAtributo("tipo").equals("function") && !idCantParametros.equals("0")){
             new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: arg count mismatch");
         }

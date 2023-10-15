@@ -12,8 +12,8 @@ var k:integer;
                     p(n-1, h);
                     k:=h;
                     p(n-2, g)
-                end
-            {write(h)}
+                end;
+            write(n)
         end;
 
     begin
