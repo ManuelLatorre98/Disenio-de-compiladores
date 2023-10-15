@@ -211,7 +211,7 @@ public class AnalizadorSintactico {
             top = new Env(top);
 
             nivelActual++;
-            pila.push("ENPR " + nivelActual);
+            pila.push("l"+ labelIndex + " ENPR " + nivelActual);
 
             //Insertar en TS cada var (parametro)
             for (Symbol temp : params) {
@@ -283,7 +283,7 @@ public class AnalizadorSintactico {
             top = new Env(top);
 
             nivelActual++;
-            pila.push("ENPR " + nivelActual);
+            pila.push("l"+labelIndex+ " ENPR " + nivelActual);
 
             /*Symbol symbReturn = new Symbol();
             symbReturn.putAtributo("nombre", id);
