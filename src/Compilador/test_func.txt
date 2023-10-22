@@ -1,5 +1,6 @@
 program ejemplo;
 var m: integer;
+z: boolean;
 
 function f(n, k: integer): integer;
   var p, q:integer;
@@ -15,5 +16,7 @@ function f(n, k: integer): integer;
   end;
 
 begin
-    write(f(3, m) + 2)
+    write(f(3, m) + 2);
+    read(m)
+    {m:= m / m}
 end.

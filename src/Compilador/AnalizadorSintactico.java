@@ -484,6 +484,12 @@ public class AnalizadorSintactico {
                     pila.push("IMPR"); //Único IMPR porque limitamos write a 1 parámetro
                 }
 
+                if(id.equals("read")){
+                    String varLectura = pila.pop();
+                    pila.push("LEER");
+                    pila.push(varLectura);
+                }
+
                 if(id.equals("read") && !tipos.get(0)[1].equals("var")){ //Si es read y el parámetro NO es variable
                     new Error("Semantic Exception ["+cabeza.getLine()+","+(cabeza.getCabeza()-1)+"]: read expected variable as parameter");
                 }
