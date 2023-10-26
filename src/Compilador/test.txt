@@ -1,0 +1,17 @@
+program prueba ;
+var
+  a, b: integer;
+  c, d: boolean;
+
+function func(a, b:integer; c, d:boolean): integer;
+var f: boolean;
+begin
+    f:= true
+end;
+
+
+begin
+  a:=2;
+  a:= func(a, b, c, d);
+  read(b);
+end.
