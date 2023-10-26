@@ -1,5 +1,6 @@
 package Compilador;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Stack;
@@ -28,6 +29,21 @@ public class AnalizadorSintactico {
             new Error("Programa vacio");
         }
         programa();
+
+        String programaMEPA = pila.toString();
+        programaMEPA = programaMEPA.replace("[", "");
+        programaMEPA = programaMEPA.replace("]", "");
+        programaMEPA = programaMEPA.replace(",", "\n");
+
+        try {
+            FileWriter myWriter = new FileWriter("src/Compilador/program.MEPA");
+            myWriter.write(programaMEPA);
+            myWriter.close();
+            System.out.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+        }
     }
 
     private void match(String string) throws IOException{
@@ -481,7 +497,7 @@ public class AnalizadorSintactico {
                 pila.push("LLPR l"+top.get(id).getAtributo("label")); //LLPR cuando NO es read o write
             }else{
                 if(id.equals("write")){
-                    pila.push("IMPR"); //Único IMPR porque limitamos write a 1 parámetro
+                    pila.push("IMLN"); //Único IMPR porque limitamos write a 1 parámetro
                 }
 
                 if(id.equals("read")){
