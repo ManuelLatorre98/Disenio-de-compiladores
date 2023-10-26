@@ -384,7 +384,7 @@ public class Automata {
             c = line.charAt(cabeza.getCabeza());
             switch (state) {
                 case 0:
-                    if (!Character.toString(c).matches("^[a-zA-Z_]+$"))
+                    if (!Character.toString(c).matches("^[a-zA-Z0-9_]+$"))
                         state = 1;// leo hasta encontrar un espacio
                     else {
                         lexema += c;

@@ -1,5 +1,5 @@
 program ejemplo;
-var m: integer;
+var m, write: integer;
 z: boolean;
 
 function f(n, k: integer): integer;
