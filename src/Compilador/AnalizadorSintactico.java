@@ -681,7 +681,7 @@ public class AnalizadorSintactico {
         String tipo="", operador, instrMEPA="";
         tipoFactor1 = factor();
         while(true){
-            if(lookahead.getValor().equals("*") || lookahead.getValor().equals("div") || lookahead.getValor().equals("and")){
+            if(lookahead.getValor().equals("*") || lookahead.getValor().equals("/") || lookahead.getValor().equals("and")){
                 tipoFactor1[1] = ""; //Seteo a "" ya que término NO es una única variable (para chequeo en READ).
                 operador = lookahead.getValor();
                 switch (operador){
@@ -691,8 +691,8 @@ public class AnalizadorSintactico {
 
                         instrMEPA = "MULT";
                         break;
-                    case "div":
-                        match("div");
+                    case "/":
+                        match("/");
                         tipo="integer";
 
                         instrMEPA = "DIVI";

@@ -17,6 +17,7 @@ function f(n, k: integer): integer;
 
 begin
     z:=True;
-    write(f(3, m) + 2);
-    write(z)
+    write(f(3, m) / 2);
+    write(z);
+    read(m)
 end.
