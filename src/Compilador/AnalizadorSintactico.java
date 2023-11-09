@@ -23,7 +23,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    public void analizar() throws IOException{
+    public void analizar(String archivo) throws IOException{
         lookahead = automata.pedirSiguienteToken();
         if(lookahead==null){
             new Error("Programa vacio");
@@ -36,9 +36,8 @@ public class AnalizadorSintactico {
         programaMEPA = programaMEPA.replace(",", "\n");
 
         try {
-            //FileWriter myWriter = new FileWriter("src/Compilador/program.MEPA");santi
-            //FileWriter myWriter = new FileWriter("Compilador/disenio-de-compiladores/src/Compilador/program.MEPA");//lemon
-            FileWriter myWriter = new FileWriter("./program.MEPA");
+            //FileWriter myWriter = new FileWriter("src/Compilador/"+archivo+".MEPA");
+            FileWriter myWriter = new FileWriter(archivo+".MEPA");
             myWriter.write(programaMEPA);
             myWriter.close();
             System.out.println("Successfully wrote to the file.");
@@ -503,7 +502,7 @@ public class AnalizadorSintactico {
                 }
 
                 if(id.equals("read")){
-                    String varLectura = pila.pop();
+                    String varLectura = pila.pop().replace("APVL", "ALVL");
                     pila.push("LEER");
                     pila.push(varLectura);
                 }
