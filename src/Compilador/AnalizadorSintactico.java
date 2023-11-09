@@ -23,7 +23,7 @@ public class AnalizadorSintactico {
         }
     }
 
-    public void analizar() throws IOException{
+    public void analizar(String archivo) throws IOException{
         lookahead = automata.pedirSiguienteToken();
         if(lookahead==null){
             new Error("Programa vacio");
@@ -36,7 +36,7 @@ public class AnalizadorSintactico {
         programaMEPA = programaMEPA.replace(",", "\n");
 
         try {
-            FileWriter myWriter = new FileWriter("src/Compilador/program.MEPA");
+            FileWriter myWriter = new FileWriter("src/Compilador/"+archivo+".MEPA");
             myWriter.write(programaMEPA);
             myWriter.close();
             System.out.println("Successfully wrote to the file.");
