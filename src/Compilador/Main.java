@@ -5,7 +5,7 @@ public class Main {
       
         //AnalizadorSintactico syntax = new AnalizadorSintactico(args[0]);
         //AnalizadorSintactico syntax = new AnalizadorSintactico("Compilador/disenio-de-compiladores/src/Compilador/test2.txt");
-        AnalizadorSintactico syntax = new AnalizadorSintactico("src/Compilador/test_func.txt");
+        AnalizadorSintactico syntax = new AnalizadorSintactico("src/Compilador/test2.txt");
         try {
             syntax.analizar();
         } catch (Exception e) {

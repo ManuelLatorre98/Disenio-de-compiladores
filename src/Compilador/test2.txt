@@ -1,9 +1,18 @@
-program prueba ;{ Archivo Prueba C&I: EJ20C.PAS }
-var
-  a, b: integer;
-  c, d: boolean;
+program ejemplo;
+var m: integer;
+
+function f(x: integer): integer;
+  var y:integer;
+  begin
+    if x<2 then begin y:=2 end
+        else
+            begin
+                while x<5 do begin x:=x+2 end
+            end;
+    f:= y + x
+  end;
 
 begin
-  a:= b*3 + a
-  {a:= func(a, b, c, d)}
+    read(m);
+    write(m)
 end.

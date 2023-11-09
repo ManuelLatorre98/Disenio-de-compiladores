@@ -501,7 +501,7 @@ public class AnalizadorSintactico {
                 }
 
                 if(id.equals("read")){
-                    String varLectura = pila.pop();
+                    String varLectura = pila.pop().replace("APVL", "ALVL");
                     pila.push("LEER");
                     pila.push(varLectura);
                 }
