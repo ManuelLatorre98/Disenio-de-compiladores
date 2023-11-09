@@ -3,8 +3,8 @@ package Compilador;
 public class Main {
     public static void main(String[] args)  {
       
-        //AnalizadorSintactico syntax = new AnalizadorSintactico(args[0]);
-        AnalizadorSintactico syntax = new AnalizadorSintactico("Compilador/disenio-de-compiladores/src/Compilador/test.txt");
+        AnalizadorSintactico syntax = new AnalizadorSintactico(args[0]);
+        //AnalizadorSintactico syntax = new AnalizadorSintactico("Compilador/disenio-de-compiladores/src/Compilador/test.txt");
         //AnalizadorSintactico syntax = new AnalizadorSintactico("src/Compilador/test_func.txt");
         try {
             syntax.analizar();
